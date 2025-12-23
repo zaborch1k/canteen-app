@@ -2,14 +2,16 @@ package ram_storage
 
 import (
 	"errors"
-	"fmt"
 
 	"canteen-app/internal/domain"
+	"canteen-app/internal/usecase"
 )
 
 type UserRepo struct {
 	Users map[domain.UserID]domain.User
 }
+
+var _ usecase.UserRepository = (*UserRepo)(nil)
 
 func NewUserRepo() *UserRepo {
 	return &UserRepo{
@@ -19,7 +21,6 @@ func NewUserRepo() *UserRepo {
 
 func (ur *UserRepo) CreateUser(user domain.User) {
 	ur.Users[user.ID] = user
-	fmt.Print(ur.Users)
 }
 
 func (ur UserRepo) GetUserByID(id domain.UserID) (domain.User, error) {
