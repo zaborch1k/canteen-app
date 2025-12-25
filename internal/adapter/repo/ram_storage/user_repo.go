@@ -2,6 +2,8 @@ package ram_storage
 
 import (
 	"errors"
+	"math/rand"
+	"time"
 
 	"canteen-app/internal/domain"
 	"canteen-app/internal/usecase"
@@ -20,6 +22,8 @@ func NewUserRepo() *UserRepo {
 }
 
 func (ur *UserRepo) CreateUser(user domain.User) {
+	rand.Seed(time.Now().UnixNano())
+	user.ID = domain.UserID(rand.Int63n(int64(234)))
 	ur.Users[user.ID] = user
 }
 
