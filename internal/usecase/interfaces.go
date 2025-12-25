@@ -4,5 +4,6 @@ import "canteen-app/internal/domain"
 
 type UserRepository interface {
 	CreateUser(user domain.User)
-	GetUserByID(id domain.UserID) (domain.User, error)
+	GetUserByID(id domain.UserID) (*domain.User, error)
+	GetUserByLogin(login string) (*domain.User, error)
 }
