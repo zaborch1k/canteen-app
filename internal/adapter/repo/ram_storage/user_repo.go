@@ -34,4 +34,11 @@ func (ur UserRepo) GetUserByID(id domain.UserID) (*domain.User, error) {
 	return &domain.User{}, errors.New("user does not exist")
 }
 
+func (uc UserRepo) GetUserByLogin(login string) (*domain.User, error) {
+	for _, val := range uc.Users {
+		if val.Login == login {
+			return &val, nil
+		}
+	}
+	return &domain.User{}, errors.New("user does not exist")
 }
