@@ -23,3 +23,11 @@ func (uc *UserUseCase) RegisterUser(login, password, name, surname, role string)
 
 	uc.users.CreateUser(user)
 }
+
+func (uc *UserUseCase) GetUserByLogin(login string) (*domain.User, error) {
+	user, err := uc.users.GetUserByLogin(login)
+	if err != nil {
+		return &domain.User{}, err
+	}
+	return user, nil
+}
