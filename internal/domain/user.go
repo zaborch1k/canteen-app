@@ -6,5 +6,7 @@ type User struct {
 	ID           UserID
 	Login        string
 	PasswordHash string
+	Name         string
+	Surname      string
 	Role         string
 }
