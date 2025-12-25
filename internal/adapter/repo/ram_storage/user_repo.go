@@ -27,9 +27,11 @@ func (ur *UserRepo) CreateUser(user domain.User) {
 	ur.Users[user.ID] = user
 }
 
-func (ur UserRepo) GetUserByID(id domain.UserID) (domain.User, error) {
+func (ur UserRepo) GetUserByID(id domain.UserID) (*domain.User, error) {
 	if user, ok := ur.Users[id]; ok {
-		return user, nil
+		return &user, nil
 	}
-	return domain.User{}, errors.New("user does not exist")
+	return &domain.User{}, errors.New("user does not exist")
+}
+
 }
