@@ -2,6 +2,8 @@ package app
 
 import (
 	"canteen-app/internal/adapter/http"
+	"canteen-app/internal/adapter/repo/ram_storage"
+	"canteen-app/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,7 +13,9 @@ type App struct {
 }
 
 func New() (*App, error) {
-	router := http.NewRouter()
+	userRepo := ram_storage.NewUserRepo()
+	userUC := usecase.NewUserUseCase(userRepo)
+	router := http.NewRouter(userUC)
 
 	return &App{
 		router: router,

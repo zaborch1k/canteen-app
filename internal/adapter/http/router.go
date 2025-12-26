@@ -1,17 +1,16 @@
-package http 
+package http
 
 import (
-    "net/http"
+	"canteen-app/internal/adapter/http/api"
+	"canteen-app/internal/usecase"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine {
-    r := gin.Default()
+func NewRouter(userUC usecase.UserUseCase) *gin.Engine {
+	r := gin.Default()
 
-    r.GET("/", func (c *gin.Context) {
-        c.String(http.StatusOK, "hello")
-    })
+	api.NewAuthHandler(r, userUC)
 
-    return r
+	return r
 }
