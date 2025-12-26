@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"canteen-app/internal/domain"
+	domUser "canteen-app/internal/domain/user"
 )
 
 type userUseCase struct {
@@ -13,7 +13,7 @@ func NewUserUseCase(users UserRepository) *userUseCase {
 }
 
 func (uc *userUseCase) RegisterUser(login, password, name, surname, role string) {
-	user := domain.User{
+	user := domUser.User{
 		Login:        login,
 		PasswordHash: password,
 		Name:         name,
@@ -24,10 +24,10 @@ func (uc *userUseCase) RegisterUser(login, password, name, surname, role string)
 	uc.users.CreateUser(user)
 }
 
-func (uc *userUseCase) GetUserByLogin(login string) (*domain.User, error) {
+func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
-		return &domain.User{}, err
+		return &domUser.User{}, err
 	}
 	return user, nil
 }

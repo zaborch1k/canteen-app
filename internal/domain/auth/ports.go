@@ -3,11 +3,11 @@ package auth
 import (
 	"time"
 
-	"canteen-app/internal/domain"
+	domUser "canteen-app/internal/domain/user"
 )
 
 type Claims struct {
-	UserID   domain.UserID
+	UserID   domUser.UserID
 	Role     string
 	ExpireAt time.Time
 }

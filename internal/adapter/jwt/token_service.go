@@ -1,8 +1,8 @@
 package jwtadapter
 
 import (
-	"canteen-app/internal/domain"
 	domAuth "canteen-app/internal/domain/auth"
+	domUser "canteen-app/internal/domain/user"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,8 +18,8 @@ func NewJWTTokenService(secret []byte, issuer string) *JWTTokenService {
 }
 
 type jwtClaims struct {
-	UserID domain.UserID `json:"sub"`
-	Role   string        `json:"role"`
+	UserID domUser.UserID `json:"sub"`
+	Role   string         `json:"role"`
 	jwt.RegisteredClaims
 }
 

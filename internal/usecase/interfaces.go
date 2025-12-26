@@ -1,14 +1,14 @@
 package usecase
 
-import "canteen-app/internal/domain"
+import domUser "canteen-app/internal/domain/user"
 
 type UserRepository interface {
-	CreateUser(user domain.User)
-	GetUserByID(id domain.UserID) (*domain.User, error)
-	GetUserByLogin(login string) (*domain.User, error)
+	CreateUser(user domUser.User)
+	GetUserByID(id domUser.UserID) (*domUser.User, error)
+	GetUserByLogin(login string) (*domUser.User, error)
 }
 
 type UserUseCase interface {
 	RegisterUser(login, password, name, surname, role string)
-	GetUserByLogin(login string) (*domain.User, error)
+	GetUserByLogin(login string) (*domUser.User, error)
 }

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"canteen-app/internal/domain"
+	domUser "canteen-app/internal/domain/user"
 	"canteen-app/internal/usecase"
 	"net/http"
 
@@ -46,7 +46,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	hash, err := domain.HashPassword(req.Password)
+	hash, err := domUser.HashPassword(req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
 		return
@@ -79,7 +79,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	if err := domain.CheckPassword(user.PasswordHash, req.Password); err != nil {
+	if err := domUser.CheckPassword(user.PasswordHash, req.Password); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}

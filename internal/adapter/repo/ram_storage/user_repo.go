@@ -5,40 +5,40 @@ import (
 	"math/rand"
 	"time"
 
-	"canteen-app/internal/domain"
+	domUser "canteen-app/internal/domain/user"
 	"canteen-app/internal/usecase"
 )
 
 type UserRepo struct {
-	Users map[domain.UserID]domain.User
+	Users map[domUser.UserID]domUser.User
 }
 
 var _ usecase.UserRepository = (*UserRepo)(nil)
 
 func NewUserRepo() *UserRepo {
 	return &UserRepo{
-		Users: make(map[domain.UserID]domain.User),
+		Users: make(map[domUser.UserID]domUser.User),
 	}
 }
 
-func (ur *UserRepo) CreateUser(user domain.User) {
+func (ur *UserRepo) CreateUser(user domUser.User) {
 	rand.Seed(time.Now().UnixNano())
-	user.ID = domain.UserID(rand.Int63n(int64(234)))
+	user.ID = domUser.UserID(rand.Int63n(int64(234)))
 	ur.Users[user.ID] = user
 }
 
-func (ur UserRepo) GetUserByID(id domain.UserID) (*domain.User, error) {
+func (ur UserRepo) GetUserByID(id domUser.UserID) (*domUser.User, error) {
 	if user, ok := ur.Users[id]; ok {
 		return &user, nil
 	}
-	return &domain.User{}, errors.New("user does not exist")
+	return &domUser.User{}, errors.New("user does not exist")
 }
 
-func (uc UserRepo) GetUserByLogin(login string) (*domain.User, error) {
+func (uc UserRepo) GetUserByLogin(login string) (*domUser.User, error) {
 	for _, val := range uc.Users {
 		if val.Login == login {
 			return &val, nil
 		}
 	}
-	return &domain.User{}, errors.New("user does not exist")
+	return &domUser.User{}, errors.New("user does not exist")
 }
