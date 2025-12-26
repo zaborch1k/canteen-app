@@ -18,6 +18,7 @@ func NewAuthHandler(router *gin.Engine, users usecase.UserUseCase) {
 	{
 		auth := router.Group("/api/auth")
 		auth.POST("/register", handler.Register)
+		auth.POST("/login", handler.Login)
 	}
 }
 
@@ -54,4 +55,35 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 
 	resp := registerResponse{AccessToken: "dfsf"}
 	c.JSON(http.StatusCreated, resp)
+}
+
+type loginRequest struct {
+	Login    string `json:"login" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type loginResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
+func (ah *AuthHandler) Login(c *gin.Context) {
+	var req loginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+
+	user, err := ah.users.GetUserByLogin(req.Login)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	if err := domain.CheckPassword(user.PasswordHash, req.Password); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	resp := loginResponse{AccessToken: "dfsf"}
+	c.JSON(http.StatusOK, resp)
 }
