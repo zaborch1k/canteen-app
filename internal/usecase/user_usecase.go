@@ -4,15 +4,15 @@ import (
 	"canteen-app/internal/domain"
 )
 
-type UserUseCase struct {
+type userUseCase struct {
 	users UserRepository
 }
 
-func NewUserUseCase(users UserRepository) *UserUseCase {
-	return &UserUseCase{users: users}
+func NewUserUseCase(users UserRepository) *userUseCase {
+	return &userUseCase{users: users}
 }
 
-func (uc *UserUseCase) RegisterUser(login, password, name, surname, role string) {
+func (uc *userUseCase) RegisterUser(login, password, name, surname, role string) {
 	user := domain.User{
 		Login:        login,
 		PasswordHash: password,
@@ -24,7 +24,7 @@ func (uc *UserUseCase) RegisterUser(login, password, name, surname, role string)
 	uc.users.CreateUser(user)
 }
 
-func (uc *UserUseCase) GetUserByLogin(login string) (*domain.User, error) {
+func (uc *userUseCase) GetUserByLogin(login string) (*domain.User, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
 		return &domain.User{}, err
