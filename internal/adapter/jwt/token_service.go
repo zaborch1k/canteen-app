@@ -3,6 +3,7 @@ package jwtadapter
 import (
 	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -36,4 +37,28 @@ func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	return token.SignedString(s.secret)
+}
+
+func (s *JWTTokenService) ParseAccesToken(tokenStr string) (domAuth.Claims, error) {
+	t, err := jwt.ParseWithClaims(tokenStr, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.secret, nil
+	})
+
+	if err != nil || !t.Valid {
+		return domAuth.Claims{}, fmt.Errorf("invalid token: %w", err)
+	}
+
+	cl, ok := t.Claims.(*jwtClaims)
+	if !ok {
+		return domAuth.Claims{}, fmt.Errorf("invalid claims type")
+	}
+
+	return domAuth.Claims{
+		UserID:   cl.UserID,
+		Role:     cl.Role,
+		ExpireAt: cl.ExpiresAt.Time,
+	}, nil
 }
