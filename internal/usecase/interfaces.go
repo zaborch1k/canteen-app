@@ -9,6 +9,6 @@ type UserRepository interface {
 }
 
 type UserUseCase interface {
-	RegisterUser(login, password, name, surname, role string)
+	RegisterUser(login, password, name, surname, role string) (accessToken string, err error)
 	GetUserByLogin(login string) (*domUser.User, error)
 }

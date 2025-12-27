@@ -29,13 +29,13 @@ func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
 		UserID: c.UserID,
 		Role:   c.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(c.ExpireAt),
+			ExpiresAt: jwt.NewNumericDate(c.ExpiresAt),
 			Issuer:    s.issuer,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(s.secret)
 }
 
@@ -57,8 +57,8 @@ func (s *JWTTokenService) ParseAccesToken(tokenStr string) (domAuth.Claims, erro
 	}
 
 	return domAuth.Claims{
-		UserID:   cl.UserID,
-		Role:     cl.Role,
-		ExpireAt: cl.ExpiresAt.Time,
+		UserID:    cl.UserID,
+		Role:      cl.Role,
+		ExpiresAt: cl.ExpiresAt.Time,
 	}, nil
 }

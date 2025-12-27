@@ -1,7 +1,10 @@
 package app
 
 import (
+	"time"
+
 	"canteen-app/internal/adapter/http"
+	jwtadapter "canteen-app/internal/adapter/jwt"
 	"canteen-app/internal/adapter/repo/ram_storage"
 	"canteen-app/internal/usecase"
 
@@ -14,7 +17,8 @@ type App struct {
 
 func New() (*App, error) {
 	userRepo := ram_storage.NewUserRepo()
-	userUC := usecase.NewUserUseCase(userRepo)
+	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), "issuer")
+	userUC := usecase.NewUserUseCase(userRepo, tokenSvc, time.Duration(30)*time.Minute)
 	router := http.NewRouter(userUC)
 
 	return &App{

@@ -7,7 +7,12 @@ import (
 )
 
 type Claims struct {
-	UserID   domUser.UserID
-	Role     string
-	ExpireAt time.Time
+	UserID    domUser.UserID
+	Role      string
+	ExpiresAt time.Time
+}
+
+type TokenService interface {
+	GenerateAccesToken(c Claims) (string, error)
+	ParseAccesToken(tokenStr string) (Claims, error)
 }

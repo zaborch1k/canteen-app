@@ -3,6 +3,7 @@ package api
 import (
 	domUser "canteen-app/internal/domain/user"
 	"canteen-app/internal/usecase"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -51,9 +52,15 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
 		return
 	}
-	ah.users.RegisterUser(req.Login, hash, req.Name, req.Surname, req.Role)
 
-	resp := registerResponse{AccessToken: "dfsf"}
+	accessToken, err := ah.users.RegisterUser(req.Login, hash, req.Name, req.Surname, req.Role)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
+	}
+
+	resp := registerResponse{AccessToken: accessToken}
 	c.JSON(http.StatusCreated, resp)
 }
 
