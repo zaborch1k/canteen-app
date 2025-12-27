@@ -19,7 +19,7 @@ func New() (*App, error) {
 	userRepo := ram_storage.NewUserRepo()
 	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), "issuer")
 	userUC := usecase.NewUserUseCase(userRepo, tokenSvc, time.Duration(30)*time.Minute)
-	router := http.NewRouter(userUC)
+	router := http.NewRouter(userUC, tokenSvc)
 
 	return &App{
 		router: router,
