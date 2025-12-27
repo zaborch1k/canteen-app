@@ -1,15 +1,14 @@
 package api
 
 import (
+	"canteen-app/internal/usecase"
 	"net/http"
 	"strings"
-
-	domAuth "canteen-app/internal/domain/auth"
 
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(tokenService domAuth.TokenService) gin.HandlerFunc {
+func AuthMiddleware(tokenService usecase.TokenService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {

@@ -10,20 +10,15 @@ import (
 type authUseCase struct {
 	users       AuthRepository
 	refreshRepo RefreshTokenRepository
-	tokens      domAuth.TokenService
+	tokens      TokenService
 	accessTTL   time.Duration
 }
 
-type Tokens struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func NewAuthUseCase(users AuthRepository, tokens domAuth.TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *authUseCase {
+func NewAuthUseCase(users AuthRepository, tokens TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *authUseCase {
 	return &authUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo}
 }
 
-func (uc *authUseCase) Register(login, password, name, surname, role string) (*Tokens, error) {
+func (uc *authUseCase) Register(login, password, name, surname, role string) (*domAuth.Tokens, error) {
 	if _, err := uc.users.GetUserByLogin(login); err == nil {
 		return nil, ErrUserExists
 	}
@@ -55,10 +50,10 @@ func (uc *authUseCase) Register(login, password, name, surname, role string) (*T
 
 	uc.refreshRepo.Save(refreshID, user.ID, refreshExp)
 
-	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
+	return &domAuth.Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
-func (uc *authUseCase) Login(login, password string) (*Tokens, error) {
+func (uc *authUseCase) Login(login, password string) (*domAuth.Tokens, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
 		return nil, ErrInvalidCredentials
@@ -80,7 +75,7 @@ func (uc *authUseCase) Login(login, password string) (*Tokens, error) {
 
 	uc.refreshRepo.Save(refreshID, user.ID, refreshExp)
 
-	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
+	return &domAuth.Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
 func (uc *authUseCase) GetUserByLogin(login string) (*domUser.User, error) {
@@ -91,7 +86,7 @@ func (uc *authUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	return user, nil
 }
 
-func (uc *authUseCase) Refresh(refreshToken string) (*Tokens, error) {
+func (uc *authUseCase) Refresh(refreshToken string) (*domAuth.Tokens, error) {
 	userID, tokenID, err := uc.tokens.ParseRefreshToken(refreshToken)
 	if err != nil {
 		return nil, ErrInvalidRefresh
@@ -116,5 +111,5 @@ func (uc *authUseCase) Refresh(refreshToken string) (*Tokens, error) {
 	}
 
 	uc.refreshRepo.Save(newID, userID, newExp)
-	return &Tokens{AccessToken: access, RefreshToken: newRefresh}, nil
+	return &domAuth.Tokens{AccessToken: access, RefreshToken: newRefresh}, nil
 }

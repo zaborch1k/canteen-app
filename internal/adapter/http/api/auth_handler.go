@@ -3,17 +3,17 @@ package api
 import (
 	"net/http"
 
-	domAuth "canteen-app/internal/domain/auth"
+	"canteen-app/internal/adapter/http/common"
 	"canteen-app/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
-	auth usecase.AuthUseCase
+	auth common.AuthUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, auth usecase.AuthUseCase, tokens domAuth.TokenService) {
+func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.TokenService) {
 	handler := &AuthHandler{auth: auth}
 
 	{

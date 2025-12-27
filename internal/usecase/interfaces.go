@@ -3,6 +3,7 @@ package usecase
 import (
 	"time"
 
+	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
 )
 
@@ -18,9 +19,9 @@ type RefreshTokenRepository interface {
 	IsValid(tokenID string, userID domUser.UserID) bool
 }
 
-type AuthUseCase interface {
-	Register(login, password, name, surname, role string) (*Tokens, error)
-	Login(login, password string) (*Tokens, error)
-	GetUserByLogin(login string) (*domUser.User, error)
-	Refresh(refreshToken string) (*Tokens, error)
+type TokenService interface {
+	GenerateAccessToken(userID domUser.UserID, role string) (string, error)
+	ParseAccessToken(tokenStr string) (domAuth.Claims, error)
+	GenerateRefreshToken(userID domUser.UserID) (string, string, time.Time, error)
+	ParseRefreshToken(tokenStr string) (domUser.UserID, string, error)
 }
