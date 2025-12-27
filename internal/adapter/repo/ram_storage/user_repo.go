@@ -1,7 +1,6 @@
 package ram_storage
 
 import (
-	"errors"
 	"math/rand"
 	"time"
 
@@ -32,7 +31,7 @@ func (ur UserRepo) GetUserByID(id domUser.UserID) (*domUser.User, error) {
 	if user, ok := ur.Users[id]; ok {
 		return &user, nil
 	}
-	return &domUser.User{}, errors.New("user does not exist")
+	return &domUser.User{}, usecase.ErrInvalidCredentials
 }
 
 func (uc UserRepo) GetUserByLogin(login string) (*domUser.User, error) {
@@ -41,5 +40,5 @@ func (uc UserRepo) GetUserByLogin(login string) (*domUser.User, error) {
 			return &val, nil
 		}
 	}
-	return &domUser.User{}, errors.New("user does not exist")
+	return &domUser.User{}, usecase.ErrInvalidCredentials
 }

@@ -3,7 +3,6 @@ package api
 import (
 	domUser "canteen-app/internal/domain/user"
 	"canteen-app/internal/usecase"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,20 +42,19 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	}
 
 	if _, err := ah.users.GetUserByLogin(req.Login); err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "user with this login has already been registered"})
+		writeError(c, usecase.ErrUserExists)
 		return
 	}
 
 	hash, err := domUser.HashPassword(req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		writeError(c, err)
 		return
 	}
 
 	accessToken, err := ah.users.Register(req.Login, hash, req.Name, req.Surname, req.Role)
 	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		writeError(c, err)
 		return
 	}
 
@@ -93,8 +91,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 
 	accessToken, err := ah.users.Login(req.Login, req.Password)
 	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		writeError(c, err)
 		return
 	}
 	resp := loginResponse{AccessToken: accessToken}
