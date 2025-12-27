@@ -6,6 +6,7 @@ import (
 
 	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
+	"canteen-app/internal/usecase"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -18,6 +19,8 @@ type JWTTokenService struct {
 	refreshTTL    time.Duration
 	issuer        string
 }
+
+var _ usecase.TokenService = (*JWTTokenService)(nil)
 
 func NewJWTTokenService(accessSecret, refreshSecret []byte, accessTTL, refreshTTL time.Duration, issuer string) *JWTTokenService {
 	return &JWTTokenService{

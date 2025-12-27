@@ -4,6 +4,7 @@ import (
 	"time"
 
 	domUser "canteen-app/internal/domain/user"
+	"canteen-app/internal/usecase"
 )
 
 type refreshRecord struct {
@@ -14,6 +15,8 @@ type refreshRecord struct {
 type RefreshRepo struct {
 	data map[string]refreshRecord
 }
+
+var _ usecase.RefreshTokenRepository = (*RefreshRepo)(nil)
 
 func NewRefreshRepo() *RefreshRepo {
 	return &RefreshRepo{
