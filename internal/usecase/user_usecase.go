@@ -1,9 +1,10 @@
 package usecase
 
 import (
+	"time"
+
 	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
-	"time"
 )
 
 type userUseCase struct {

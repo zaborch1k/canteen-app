@@ -1,10 +1,11 @@
 package api
 
 import (
-	"canteen-app/internal/usecase"
 	"errors"
 	"log"
 	"net/http"
+
+	"canteen-app/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,10 +1,11 @@
 package jwtadapter
 
 import (
-	domAuth "canteen-app/internal/domain/auth"
-	domUser "canteen-app/internal/domain/user"
 	"fmt"
 	"time"
+
+	domAuth "canteen-app/internal/domain/auth"
+	domUser "canteen-app/internal/domain/user"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

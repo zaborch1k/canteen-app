@@ -1,8 +1,9 @@
 package ram_storage
 
 import (
-	domUser "canteen-app/internal/domain/user"
 	"time"
+
+	domUser "canteen-app/internal/domain/user"
 )
 
 type refreshRecord struct {

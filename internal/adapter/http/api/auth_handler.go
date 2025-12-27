@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	domAuth "canteen-app/internal/domain/auth"
 	"canteen-app/internal/usecase"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
