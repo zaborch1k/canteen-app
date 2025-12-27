@@ -41,6 +41,23 @@ func (uc *userUseCase) RegisterUser(login, password, name, surname, role string)
 	return access, nil
 }
 
+func (uc *userUseCase) Login(login, password string) (accessToken string, err error) {
+	user, _ := uc.users.GetUserByLogin(login)
+
+	claims := domAuth.Claims{
+		UserID:    user.ID,
+		Role:      user.Role,
+		ExpiresAt: time.Now().Add(uc.accessTTL),
+	}
+
+	accessToken, err = uc.tokens.GenerateAccesToken(claims)
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
+}
+
 func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {

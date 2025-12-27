@@ -91,6 +91,12 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	resp := loginResponse{AccessToken: "dfsf"}
+	accessToken, err := ah.users.Login(req.Login, req.Password)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
+	}
+	resp := loginResponse{AccessToken: accessToken}
 	c.JSON(http.StatusOK, resp)
 }
