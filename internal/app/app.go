@@ -17,8 +17,9 @@ type App struct {
 
 func New() (*App, error) {
 	userRepo := ram_storage.NewUserRepo()
+	refreshRepo := ram_storage.NewRefreshRepo()
 	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), "issuer", []byte("SECRET2"), time.Hour*24*7)
-	userUC := usecase.NewUserUseCase(userRepo, tokenSvc, time.Duration(30)*time.Minute)
+	userUC := usecase.NewUserUseCase(userRepo, tokenSvc, time.Duration(30)*time.Minute, refreshRepo)
 	router := http.NewRouter(userUC, tokenSvc)
 
 	return &App{

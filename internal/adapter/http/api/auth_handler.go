@@ -30,10 +30,6 @@ type registerRequest struct {
 	Role     string `json:"role" binding:"required"`
 }
 
-type registerResponse struct {
-	AccessToken string `json:"access_token"`
-}
-
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -41,23 +37,18 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := ah.users.Register(req.Login, req.Password, req.Name, req.Surname, req.Role)
+	tokens, err := ah.users.Register(req.Login, req.Password, req.Name, req.Surname, req.Role)
 	if err != nil {
 		writeError(c, err)
 		return
 	}
 
-	resp := registerResponse{AccessToken: accessToken}
-	c.JSON(http.StatusCreated, resp)
+	c.JSON(http.StatusCreated, tokens)
 }
 
 type loginRequest struct {
 	Login    string `json:"login" binding:"required"`
 	Password string `json:"password" binding:"required"`
-}
-
-type loginResponse struct {
-	AccessToken string `json:"access_token"`
 }
 
 func (ah *AuthHandler) Login(c *gin.Context) {
@@ -67,12 +58,11 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := ah.users.Login(req.Login, req.Password)
+	tokens, err := ah.users.Login(req.Login, req.Password)
 	if err != nil {
 		writeError(c, err)
 		return
 	}
 
-	resp := loginResponse{AccessToken: accessToken}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, tokens)
 }

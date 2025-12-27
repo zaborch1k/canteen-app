@@ -19,6 +19,8 @@ func writeError(c *gin.Context, err error) {
 		c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 	case errors.Is(err, usecase.ErrUserNotFound):
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	case errors.Is(err, usecase.ErrInvalidRefresh):
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 	}

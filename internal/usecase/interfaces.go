@@ -18,7 +18,7 @@ type RefreshTokenRepository interface {
 }
 
 type UserUseCase interface {
-	Register(login, password, name, surname, role string) (accessToken string, err error)
-	Login(login, password string) (accessToken string, err error)
+	Register(login, password, name, surname, role string) (*Tokens, error)
+	Login(login, password string) (*Tokens, error)
 	GetUserByLogin(login string) (*domUser.User, error)
 }

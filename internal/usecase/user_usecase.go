@@ -7,23 +7,29 @@ import (
 )
 
 type userUseCase struct {
-	users     UserRepository
-	tokens    domAuth.TokenService
-	accessTTL time.Duration
+	users       UserRepository
+	refreshRepo RefreshTokenRepository
+	tokens      domAuth.TokenService
+	accessTTL   time.Duration
 }
 
-func NewUserUseCase(users UserRepository, tokens domAuth.TokenService, accessTTL time.Duration) *userUseCase {
-	return &userUseCase{users: users, tokens: tokens, accessTTL: accessTTL}
+type Tokens struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
-func (uc *userUseCase) Register(login, password, name, surname, role string) (accessToken string, err error) {
+func NewUserUseCase(users UserRepository, tokens domAuth.TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *userUseCase {
+	return &userUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo}
+}
+
+func (uc *userUseCase) Register(login, password, name, surname, role string) (*Tokens, error) {
 	if _, err := uc.users.GetUserByLogin(login); err == nil {
-		return "", ErrUserExists
+		return nil, ErrUserExists
 	}
 
 	hash, err := domUser.HashPassword(password)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user := domUser.User{
@@ -44,20 +50,27 @@ func (uc *userUseCase) Register(login, password, name, surname, role string) (ac
 
 	access, err := uc.tokens.GenerateAccesToken(claims)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return access, nil
+	refresh, refreshID, refreshExp, err := uc.tokens.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	uc.refreshRepo.Save(refreshID, user.ID, refreshExp)
+
+	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
-func (uc *userUseCase) Login(login, password string) (accessToken string, err error) {
+func (uc *userUseCase) Login(login, password string) (*Tokens, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
-		return "", ErrInvalidCredentials
+		return nil, ErrInvalidCredentials
 	}
 
 	if err := domUser.CheckPassword(user.PasswordHash, password); err != nil {
-		return "", ErrInvalidCredentials
+		return nil, ErrInvalidCredentials
 	}
 
 	claims := domAuth.Claims{
@@ -66,12 +79,19 @@ func (uc *userUseCase) Login(login, password string) (accessToken string, err er
 		ExpiresAt: time.Now().Add(uc.accessTTL),
 	}
 
-	accessToken, err = uc.tokens.GenerateAccesToken(claims)
+	access, err := uc.tokens.GenerateAccesToken(claims)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return accessToken, nil
+	refresh, refreshID, refreshExp, err := uc.tokens.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	uc.refreshRepo.Save(refreshID, user.ID, refreshExp)
+
+	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
 func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
