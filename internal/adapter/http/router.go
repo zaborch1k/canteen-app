@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(userUC usecase.UserUseCase, tokenService domAuth.TokenService) *gin.Engine {
+func NewRouter(authUC usecase.AuthUseCase, tokenService domAuth.TokenService) *gin.Engine {
 	r := gin.Default()
 
-	api.NewAuthHandler(r, userUC, tokenService)
+	api.NewAuthHandler(r, authUC, tokenService)
 
 	return r
 }

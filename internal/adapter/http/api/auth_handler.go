@@ -10,11 +10,11 @@ import (
 )
 
 type AuthHandler struct {
-	users usecase.UserUseCase
+	auth usecase.AuthUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, users usecase.UserUseCase, tokens domAuth.TokenService) {
-	handler := &AuthHandler{users: users}
+func NewAuthHandler(router *gin.Engine, auth usecase.AuthUseCase, tokens domAuth.TokenService) {
+	handler := &AuthHandler{auth: auth}
 
 	{
 		auth := router.Group("/api/auth")
@@ -39,7 +39,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	tokens, err := ah.users.Register(req.Login, req.Password, req.Name, req.Surname, req.Role)
+	tokens, err := ah.auth.Register(req.Login, req.Password, req.Name, req.Surname, req.Role)
 	if err != nil {
 		writeError(c, err)
 		return
@@ -60,7 +60,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	tokens, err := ah.users.Login(req.Login, req.Password)
+	tokens, err := ah.auth.Login(req.Login, req.Password)
 	if err != nil {
 		writeError(c, err)
 		return
@@ -79,7 +79,7 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 	}
 
-	tokens, err := ah.users.Refresh(req.RefreshToken)
+	tokens, err := ah.auth.Refresh(req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
 	}

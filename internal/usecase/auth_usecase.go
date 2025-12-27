@@ -7,8 +7,8 @@ import (
 	domUser "canteen-app/internal/domain/user"
 )
 
-type userUseCase struct {
-	users       UserRepository
+type authUseCase struct {
+	users       AuthRepository
 	refreshRepo RefreshTokenRepository
 	tokens      domAuth.TokenService
 	accessTTL   time.Duration
@@ -19,11 +19,11 @@ type Tokens struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func NewUserUseCase(users UserRepository, tokens domAuth.TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *userUseCase {
-	return &userUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo}
+func NewAuthUseCase(users AuthRepository, tokens domAuth.TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *authUseCase {
+	return &authUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo}
 }
 
-func (uc *userUseCase) Register(login, password, name, surname, role string) (*Tokens, error) {
+func (uc *authUseCase) Register(login, password, name, surname, role string) (*Tokens, error) {
 	if _, err := uc.users.GetUserByLogin(login); err == nil {
 		return nil, ErrUserExists
 	}
@@ -64,7 +64,7 @@ func (uc *userUseCase) Register(login, password, name, surname, role string) (*T
 	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
-func (uc *userUseCase) Login(login, password string) (*Tokens, error) {
+func (uc *authUseCase) Login(login, password string) (*Tokens, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
 		return nil, ErrInvalidCredentials
@@ -95,7 +95,7 @@ func (uc *userUseCase) Login(login, password string) (*Tokens, error) {
 	return &Tokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
-func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
+func (uc *authUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	user, err := uc.users.GetUserByLogin(login)
 	if err != nil {
 		return &domUser.User{}, err
@@ -103,7 +103,7 @@ func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	return user, nil
 }
 
-func (uc *userUseCase) Refresh(refreshToken string) (*Tokens, error) {
+func (uc *authUseCase) Refresh(refreshToken string) (*Tokens, error) {
 	userID, tokenID, err := uc.tokens.ParseRefreshToken(refreshToken)
 	if err != nil {
 		return nil, ErrInvalidRefresh
