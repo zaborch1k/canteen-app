@@ -13,8 +13,8 @@ type Claims struct {
 }
 
 type TokenService interface {
-	GenerateAccesToken(c Claims) (string, error)
-	ParseAccesToken(tokenStr string) (Claims, error)
+	GenerateAccessToken(userID domUser.UserID, role string) (string, error)
+	ParseAccessToken(tokenStr string) (Claims, error)
 	GenerateRefreshToken(userID domUser.UserID) (string, string, time.Time, error)
 	ParseRefreshToken(tokenStr string) (domUser.UserID, string, error)
 }

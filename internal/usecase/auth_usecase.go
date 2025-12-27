@@ -43,13 +43,7 @@ func (uc *authUseCase) Register(login, password, name, surname, role string) (*T
 
 	userID := uc.users.CreateUser(user)
 
-	claims := domAuth.Claims{
-		UserID:    userID,
-		Role:      user.Role,
-		ExpiresAt: time.Now().Add(uc.accessTTL),
-	}
-
-	access, err := uc.tokens.GenerateAccesToken(claims)
+	access, err := uc.tokens.GenerateAccessToken(userID, user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +68,7 @@ func (uc *authUseCase) Login(login, password string) (*Tokens, error) {
 		return nil, ErrInvalidCredentials
 	}
 
-	claims := domAuth.Claims{
-		UserID:    user.ID,
-		Role:      user.Role,
-		ExpiresAt: time.Now().Add(uc.accessTTL),
-	}
-
-	access, err := uc.tokens.GenerateAccesToken(claims)
+	access, err := uc.tokens.GenerateAccessToken(user.ID, user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +105,7 @@ func (uc *authUseCase) Refresh(refreshToken string) (*Tokens, error) {
 	uc.refreshRepo.Delete(tokenID)
 
 	user, _ := uc.users.GetUserByID(userID)
-	access, err := uc.tokens.GenerateAccesToken(domAuth.Claims{UserID: userID, Role: user.Role, ExpiresAt: time.Now().Add(uc.accessTTL)})
+	access, err := uc.tokens.GenerateAccessToken(userID, user.Role)
 	if err != nil {
 		return nil, err
 	}

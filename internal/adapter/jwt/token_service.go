@@ -13,13 +13,20 @@ import (
 
 type JWTTokenService struct {
 	accessSecret  []byte
-	issuer        string
 	refreshSecret []byte
+	accessTTL     time.Duration
 	refreshTTL    time.Duration
+	issuer        string
 }
 
-func NewJWTTokenService(accessSecret []byte, issuer string, refreshSecret []byte, refreshTTL time.Duration) *JWTTokenService {
-	return &JWTTokenService{accessSecret: accessSecret, issuer: issuer, refreshSecret: refreshSecret, refreshTTL: refreshTTL}
+func NewJWTTokenService(accessSecret, refreshSecret []byte, accessTTL, refreshTTL time.Duration, issuer string) *JWTTokenService {
+	return &JWTTokenService{
+		accessSecret:  accessSecret,
+		refreshSecret: refreshSecret,
+		accessTTL:     accessTTL,
+		refreshTTL:    refreshTTL,
+		issuer:        issuer,
+	}
 }
 
 type accessClaims struct {
@@ -34,12 +41,13 @@ type refreshClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
+func (s *JWTTokenService) GenerateAccessToken(userID domUser.UserID, role string) (string, error) {
+	exp := time.Now().Add(s.accessTTL)
 	claims := accessClaims{
-		UserID: c.UserID,
-		Role:   c.Role,
+		UserID: userID,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(c.ExpiresAt),
+			ExpiresAt: jwt.NewNumericDate(exp),
 			Issuer:    s.issuer,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
@@ -49,7 +57,7 @@ func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
 	return token.SignedString(s.accessSecret)
 }
 
-func (s *JWTTokenService) ParseAccesToken(tokenStr string) (domAuth.Claims, error) {
+func (s *JWTTokenService) ParseAccessToken(tokenStr string) (domAuth.Claims, error) {
 	t, err := jwt.ParseWithClaims(tokenStr, &accessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

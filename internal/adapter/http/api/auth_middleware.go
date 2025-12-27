@@ -23,7 +23,7 @@ func AuthMiddleware(tokenService domAuth.TokenService) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := tokenService.ParseAccesToken(parts[1])
+		claims, err := tokenService.ParseAccessToken(parts[1])
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
