@@ -7,25 +7,34 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type JWTTokenService struct {
-	secret []byte
-	issuer string
+	accessSecret  []byte
+	issuer        string
+	refreshSecret []byte
+	refreshTTL    time.Duration
 }
 
-func NewJWTTokenService(secret []byte, issuer string) *JWTTokenService {
-	return &JWTTokenService{secret: secret, issuer: issuer}
+func NewJWTTokenService(accessSecret []byte, issuer string, refreshSecret []byte, refreshTTL time.Duration) *JWTTokenService {
+	return &JWTTokenService{accessSecret: accessSecret, issuer: issuer, refreshSecret: refreshSecret, refreshTTL: refreshTTL}
 }
 
-type jwtClaims struct {
+type accessClaims struct {
 	UserID domUser.UserID `json:"sub"`
 	Role   string         `json:"role"`
 	jwt.RegisteredClaims
 }
 
+type refreshClaims struct {
+	UserID  domUser.UserID `json:"sub"`
+	TokenID string         `json:"tid"`
+	jwt.RegisteredClaims
+}
+
 func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
-	claims := jwtClaims{
+	claims := accessClaims{
 		UserID: c.UserID,
 		Role:   c.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -36,22 +45,22 @@ func (s *JWTTokenService) GenerateAccesToken(c domAuth.Claims) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(s.secret)
+	return token.SignedString(s.accessSecret)
 }
 
 func (s *JWTTokenService) ParseAccesToken(tokenStr string) (domAuth.Claims, error) {
-	t, err := jwt.ParseWithClaims(tokenStr, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(tokenStr, &accessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return s.secret, nil
+		return s.accessSecret, nil
 	})
 
 	if err != nil || !t.Valid {
 		return domAuth.Claims{}, fmt.Errorf("invalid token: %w", err)
 	}
 
-	cl, ok := t.Claims.(*jwtClaims)
+	cl, ok := t.Claims.(*accessClaims)
 	if !ok {
 		return domAuth.Claims{}, fmt.Errorf("invalid claims type")
 	}
@@ -61,4 +70,31 @@ func (s *JWTTokenService) ParseAccesToken(tokenStr string) (domAuth.Claims, erro
 		Role:      cl.Role,
 		ExpiresAt: cl.ExpiresAt.Time,
 	}, nil
+}
+
+func (s *JWTTokenService) GenerateRefreshToken(userID domUser.UserID) (string, string, time.Time, error) {
+	exp := time.Now().Add(s.refreshTTL)
+	id := uuid.NewString()
+	claims := refreshClaims{
+		UserID:  userID,
+		TokenID: id,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(exp),
+			ID:        id,
+		},
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	str, err := t.SignedString(s.refreshSecret)
+	return str, id, exp, err
+}
+
+func (s *JWTTokenService) ParseRefreshToken(tokenStr string) (domUser.UserID, string, error) {
+	var claims refreshClaims
+	_, err := jwt.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (interface{}, error) {
+		return s.refreshSecret, nil
+	})
+	if err != nil {
+		return 0, "", err
+	}
+	return claims.UserID, claims.TokenID, nil
 }
