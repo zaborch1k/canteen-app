@@ -25,3 +25,8 @@ type TokenService interface {
 	GenerateRefreshToken(userID domUser.UserID) (string, string, time.Time, error)
 	ParseRefreshToken(tokenStr string) (domUser.UserID, string, error)
 }
+
+type PasswordHasher interface {
+	Hash(password string) (string, error)
+	Compare(hash, password string) error
+}

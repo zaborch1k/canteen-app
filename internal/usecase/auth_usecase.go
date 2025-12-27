@@ -13,12 +13,13 @@ type authUseCase struct {
 	refreshRepo RefreshTokenRepository
 	tokens      TokenService
 	accessTTL   time.Duration
+	hasher      PasswordHasher
 }
 
 var _ common.AuthUseCase = (*authUseCase)(nil)
 
-func NewAuthUseCase(users AuthRepository, tokens TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository) *authUseCase {
-	return &authUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo}
+func NewAuthUseCase(users AuthRepository, tokens TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
+	return &authUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo, hasher: hasher}
 }
 
 func (uc *authUseCase) Register(login, password, name, surname, role string) (*domAuth.Tokens, error) {
@@ -26,7 +27,7 @@ func (uc *authUseCase) Register(login, password, name, surname, role string) (*d
 		return nil, ErrUserExists
 	}
 
-	hash, err := domUser.HashPassword(password)
+	hash, err := uc.hasher.Hash(password)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func (uc *authUseCase) Login(login, password string) (*domAuth.Tokens, error) {
 		return nil, ErrInvalidCredentials
 	}
 
-	if err := domUser.CheckPassword(user.PasswordHash, password); err != nil {
+	if err := uc.hasher.Compare(user.PasswordHash, password); err != nil {
 		return nil, ErrInvalidCredentials
 	}
 
