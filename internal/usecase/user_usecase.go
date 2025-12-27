@@ -17,9 +17,18 @@ func NewUserUseCase(users UserRepository, tokens domAuth.TokenService, accessTTL
 }
 
 func (uc *userUseCase) Register(login, password, name, surname, role string) (accessToken string, err error) {
+	if _, err := uc.users.GetUserByLogin(login); err == nil {
+		return "", ErrUserExists
+	}
+
+	hash, err := domUser.HashPassword(password)
+	if err != nil {
+		return "", err
+	}
+
 	user := domUser.User{
 		Login:        login,
-		PasswordHash: password,
+		PasswordHash: hash,
 		Name:         name,
 		Surname:      surname,
 		Role:         role,
@@ -42,7 +51,14 @@ func (uc *userUseCase) Register(login, password, name, surname, role string) (ac
 }
 
 func (uc *userUseCase) Login(login, password string) (accessToken string, err error) {
-	user, _ := uc.users.GetUserByLogin(login)
+	user, err := uc.users.GetUserByLogin(login)
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+
+	if err := domUser.CheckPassword(user.PasswordHash, password); err != nil {
+		return "", ErrInvalidCredentials
+	}
 
 	claims := domAuth.Claims{
 		UserID:    user.ID,

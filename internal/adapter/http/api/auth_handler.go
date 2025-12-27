@@ -1,7 +1,6 @@
 package api
 
 import (
-	domUser "canteen-app/internal/domain/user"
 	"canteen-app/internal/usecase"
 	"net/http"
 
@@ -41,18 +40,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	if _, err := ah.users.GetUserByLogin(req.Login); err == nil {
-		writeError(c, usecase.ErrUserExists)
-		return
-	}
-
-	hash, err := domUser.HashPassword(req.Password)
-	if err != nil {
-		writeError(c, err)
-		return
-	}
-
-	accessToken, err := ah.users.Register(req.Login, hash, req.Name, req.Surname, req.Role)
+	accessToken, err := ah.users.Register(req.Login, req.Password, req.Name, req.Surname, req.Role)
 	if err != nil {
 		writeError(c, err)
 		return
@@ -78,22 +66,12 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := ah.users.GetUserByLogin(req.Login)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-		return
-	}
-
-	if err := domUser.CheckPassword(user.PasswordHash, req.Password); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-		return
-	}
-
 	accessToken, err := ah.users.Login(req.Login, req.Password)
 	if err != nil {
 		writeError(c, err)
 		return
 	}
+
 	resp := loginResponse{AccessToken: accessToken}
 	c.JSON(http.StatusOK, resp)
 }
