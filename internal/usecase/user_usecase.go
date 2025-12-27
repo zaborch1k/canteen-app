@@ -101,3 +101,31 @@ func (uc *userUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	}
 	return user, nil
 }
+
+func (uc *userUseCase) Refresh(refreshToken string) (*Tokens, error) {
+	userID, tokenID, err := uc.tokens.ParseRefreshToken(refreshToken)
+	if err != nil {
+		return nil, ErrInvalidRefresh
+	}
+
+	ok := uc.refreshRepo.IsValid(tokenID, userID)
+	if !ok {
+		return nil, ErrInvalidRefresh
+	}
+
+	uc.refreshRepo.Delete(tokenID)
+
+	user, _ := uc.users.GetUserByID(userID)
+	access, err := uc.tokens.GenerateAccesToken(domAuth.Claims{UserID: userID, Role: user.Role, ExpiresAt: time.Now().Add(uc.accessTTL)})
+	if err != nil {
+		return nil, err
+	}
+
+	newRefresh, newID, newExp, err := uc.tokens.GenerateRefreshToken(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	uc.refreshRepo.Save(newID, userID, newExp)
+	return &Tokens{AccessToken: access, RefreshToken: newRefresh}, nil
+}

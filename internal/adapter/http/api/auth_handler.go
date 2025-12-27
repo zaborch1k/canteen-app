@@ -19,6 +19,7 @@ func NewAuthHandler(router *gin.Engine, users usecase.UserUseCase, tokens domAut
 		auth := router.Group("/api/auth")
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
+		auth.POST("/refresh", handler.Refresh)
 	}
 }
 
@@ -64,5 +65,22 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, tokens)
+}
+
+type refreshRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+func (ah *AuthHandler) Refresh(c *gin.Context) {
+	var req refreshRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+	}
+
+	tokens, err := ah.users.Refresh(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+	}
 	c.JSON(http.StatusOK, tokens)
 }

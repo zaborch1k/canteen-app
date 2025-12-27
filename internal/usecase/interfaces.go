@@ -21,4 +21,5 @@ type UserUseCase interface {
 	Register(login, password, name, surname, role string) (*Tokens, error)
 	Login(login, password string) (*Tokens, error)
 	GetUserByLogin(login string) (*domUser.User, error)
+	Refresh(refreshToken string) (*Tokens, error)
 }
