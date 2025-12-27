@@ -1,11 +1,20 @@
 package usecase
 
-import domUser "canteen-app/internal/domain/user"
+import (
+	domUser "canteen-app/internal/domain/user"
+	"time"
+)
 
 type UserRepository interface {
 	CreateUser(user domUser.User) domUser.UserID
 	GetUserByID(id domUser.UserID) (*domUser.User, error)
 	GetUserByLogin(login string) (*domUser.User, error)
+}
+
+type RefreshTokenRepository interface {
+	Save(tokenID string, userID domUser.UserID, exp time.Time)
+	Delete(tokenID string)
+	IsValid(tokenID string, userID domUser.UserID) bool
 }
 
 type UserUseCase interface {
