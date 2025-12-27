@@ -16,7 +16,7 @@ func NewUserUseCase(users UserRepository, tokens domAuth.TokenService, accessTTL
 	return &userUseCase{users: users, tokens: tokens, accessTTL: accessTTL}
 }
 
-func (uc *userUseCase) RegisterUser(login, password, name, surname, role string) (accessToken string, err error) {
+func (uc *userUseCase) Register(login, password, name, surname, role string) (accessToken string, err error) {
 	user := domUser.User{
 		Login:        login,
 		PasswordHash: password,

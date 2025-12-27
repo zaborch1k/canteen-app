@@ -53,7 +53,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := ah.users.RegisterUser(req.Login, hash, req.Name, req.Surname, req.Role)
+	accessToken, err := ah.users.Register(req.Login, hash, req.Name, req.Surname, req.Role)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
