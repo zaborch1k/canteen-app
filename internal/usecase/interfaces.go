@@ -3,7 +3,7 @@ package usecase
 import domUser "canteen-app/internal/domain/user"
 
 type UserRepository interface {
-	CreateUser(user domUser.User)
+	CreateUser(user domUser.User) domUser.UserID
 	GetUserByID(id domUser.UserID) (*domUser.User, error)
 	GetUserByLogin(login string) (*domUser.User, error)
 }

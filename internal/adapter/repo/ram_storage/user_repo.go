@@ -21,10 +21,11 @@ func NewUserRepo() *UserRepo {
 	}
 }
 
-func (ur *UserRepo) CreateUser(user domUser.User) {
+func (ur *UserRepo) CreateUser(user domUser.User) domUser.UserID {
 	rand.Seed(time.Now().UnixNano())
 	user.ID = domUser.UserID(rand.Int63n(int64(234)))
 	ur.Users[user.ID] = user
+	return user.ID
 }
 
 func (ur UserRepo) GetUserByID(id domUser.UserID) (*domUser.User, error) {
