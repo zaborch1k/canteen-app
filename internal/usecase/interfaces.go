@@ -7,7 +7,7 @@ import (
 	domUser "canteen-app/internal/domain/user"
 )
 
-type AuthRepository interface {
+type UserRepository interface {
 	CreateUser(user domUser.User) domUser.UserID
 	GetUserByID(id domUser.UserID) (*domUser.User, error)
 	GetUserByLogin(login string) (*domUser.User, error)

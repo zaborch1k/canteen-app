@@ -7,7 +7,7 @@ import (
 )
 
 type authUseCase struct {
-	users       AuthRepository
+	users       UserRepository
 	refreshRepo RefreshTokenRepository
 	tokens      TokenService
 	hasher      PasswordHasher
@@ -15,7 +15,7 @@ type authUseCase struct {
 
 var _ common.AuthUseCase = (*authUseCase)(nil)
 
-func NewAuthUseCase(users AuthRepository, tokens TokenService, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
+func NewAuthUseCase(users UserRepository, tokens TokenService, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
 	return &authUseCase{users: users, tokens: tokens, refreshRepo: refreshRepo, hasher: hasher}
 }
 

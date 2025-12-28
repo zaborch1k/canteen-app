@@ -12,7 +12,7 @@ type UserRepo struct {
 	Users map[domUser.UserID]domUser.User
 }
 
-var _ usecase.AuthRepository = (*UserRepo)(nil)
+var _ usecase.UserRepository = (*UserRepo)(nil)
 
 func NewUserRepo() *UserRepo {
 	return &UserRepo{
