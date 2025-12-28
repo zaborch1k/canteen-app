@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"canteen-app/internal/adapter/http/common"
 	"canteen-app/internal/usecase"
@@ -20,7 +21,7 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.
 		auth := router.Group("/api/auth")
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
-		auth.POST("/refresh", handler.Refresh)
+		auth.GET("/refresh", handler.Refresh)
 	}
 }
 
@@ -45,7 +46,18 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, tokens)
+	c.SetCookieData(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		Domain:   "",
+		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	c.JSON(http.StatusCreated, gin.H{"access_token": tokens.AccessToken})
 }
 
 type loginRequest struct {
@@ -66,22 +78,41 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, tokens)
-}
+	c.SetCookieData(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		Domain:   "",
+		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
 
-type refreshRequest struct {
-	RefreshToken string `json:"refresh_token" binding:"required"`
+	c.JSON(http.StatusOK, gin.H{"access_token": tokens.AccessToken})
 }
 
 func (ah *AuthHandler) Refresh(c *gin.Context) {
-	var req refreshRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no refresh token"})
+		return
 	}
 
-	tokens, err := ah.auth.Refresh(req.RefreshToken)
+	tokens, err := ah.auth.Refresh(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
 	}
-	c.JSON(http.StatusOK, tokens)
+
+	c.SetCookieData(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		Domain:   "",
+		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+	c.JSON(http.StatusOK, gin.H{"access_token": tokens.AccessToken})
 }
