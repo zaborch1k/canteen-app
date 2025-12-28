@@ -101,7 +101,8 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 
 	tokens, err := ah.auth.Refresh(refreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+		writeError(c, err)
+		return
 	}
 
 	c.SetCookieData(&http.Cookie{
