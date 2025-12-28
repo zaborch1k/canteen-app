@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"time"
-
 	"canteen-app/internal/adapter/http/common"
 	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
@@ -12,14 +10,13 @@ type authUseCase struct {
 	users       AuthRepository
 	refreshRepo RefreshTokenRepository
 	tokens      TokenService
-	accessTTL   time.Duration
 	hasher      PasswordHasher
 }
 
 var _ common.AuthUseCase = (*authUseCase)(nil)
 
-func NewAuthUseCase(users AuthRepository, tokens TokenService, accessTTL time.Duration, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
-	return &authUseCase{users: users, tokens: tokens, accessTTL: accessTTL, refreshRepo: refreshRepo, hasher: hasher}
+func NewAuthUseCase(users AuthRepository, tokens TokenService, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
+	return &authUseCase{users: users, tokens: tokens, refreshRepo: refreshRepo, hasher: hasher}
 }
 
 func (uc *authUseCase) Register(login, password, name, surname, role string) (*domAuth.Tokens, error) {

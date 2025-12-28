@@ -19,10 +19,14 @@ type App struct {
 func New() (*App, error) {
 	userRepo := ram_storage.NewUserRepo()
 	refreshRepo := ram_storage.NewRefreshRepo()
-	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), []byte("SECRET2"), time.Hour*24*7, time.Hour*24*30, "issuer")
+
+	accessTTL := time.Minute * 30
+	refreshTTL := time.Hour * 24 * 30
+
+	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), []byte("SECRET2"), accessTTL, refreshTTL, "issuer")
 	bhasher := security.BcryptHasher{}
-	authUC := usecase.NewAuthUseCase(userRepo, tokenSvc, time.Duration(1)*time.Minute, refreshRepo, bhasher)
-	router := http.NewRouter(authUC, tokenSvc)
+	authUC := usecase.NewAuthUseCase(userRepo, tokenSvc, refreshRepo, bhasher)
+	router := http.NewRouter(authUC, tokenSvc, refreshTTL)
 
 	return &App{
 		router: router,

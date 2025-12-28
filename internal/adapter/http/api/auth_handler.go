@@ -11,11 +11,12 @@ import (
 )
 
 type AuthHandler struct {
-	auth common.AuthUseCase
+	auth       common.AuthUseCase
+	refreshTTL time.Duration
 }
 
-func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.TokenService) {
-	handler := &AuthHandler{auth: auth}
+func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.TokenService, refreshTTL time.Duration) {
+	handler := &AuthHandler{auth: auth, refreshTTL: refreshTTL}
 
 	{
 		auth := router.Group("/api/auth")
@@ -51,7 +52,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		Value:    tokens.RefreshToken,
 		Path:     "/",
 		Domain:   "",
-		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		Expires:  time.Now().Add(ah.refreshTTL),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
@@ -83,7 +84,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		Value:    tokens.RefreshToken,
 		Path:     "/",
 		Domain:   "",
-		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		Expires:  time.Now().Add(ah.refreshTTL),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
@@ -110,7 +111,7 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 		Value:    tokens.RefreshToken,
 		Path:     "/",
 		Domain:   "",
-		Expires:  time.Now().Add(13 * 24 * time.Hour),
+		Expires:  time.Now().Add(ah.refreshTTL),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
