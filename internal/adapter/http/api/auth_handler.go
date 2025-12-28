@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -22,6 +23,7 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.
 		auth := router.Group("/api/auth")
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
+		auth.POST("/logout", handler.Logout)
 		auth.GET("/refresh", handler.Refresh)
 	}
 }
@@ -117,4 +119,26 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 		SameSite: http.SameSiteLaxMode,
 	})
 	c.JSON(http.StatusOK, gin.H{"access_token": tokens.AccessToken})
+}
+
+func (ah *AuthHandler) Logout(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err == nil && refreshToken != "" {
+		if err := ah.auth.RevokeRefreshToken(refreshToken); err != nil {
+			log.Printf("failed to revoke refresh token: %v", err)
+		}
+	}
+
+	c.SetCookieData(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	c.Status(http.StatusNoContent)
 }

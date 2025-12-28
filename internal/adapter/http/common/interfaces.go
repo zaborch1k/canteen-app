@@ -10,4 +10,5 @@ type AuthUseCase interface {
 	Login(login, password string) (*domAuth.Tokens, error)
 	GetUserByLogin(login string) (*domUser.User, error)
 	Refresh(refreshToken string) (*domAuth.Tokens, error)
+	RevokeRefreshToken(refreshToken string) error
 }

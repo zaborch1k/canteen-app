@@ -114,3 +114,18 @@ func (uc *authUseCase) Refresh(refreshToken string) (*domAuth.Tokens, error) {
 	uc.refreshRepo.Save(newID, userID, newExp)
 	return &domAuth.Tokens{AccessToken: access, RefreshToken: newRefresh}, nil
 }
+
+func (uc *authUseCase) RevokeRefreshToken(refreshToken string) error {
+	userID, tokenID, err := uc.tokens.ParseRefreshToken(refreshToken)
+	if err != nil {
+		return ErrInvalidRefresh
+	}
+
+	ok := uc.refreshRepo.IsValid(tokenID, userID)
+	if !ok {
+		return ErrInvalidRefresh
+	}
+
+	uc.refreshRepo.Delete(tokenID)
+	return nil
+}
