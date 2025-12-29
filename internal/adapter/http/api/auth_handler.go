@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	_ "canteen-app/cmd/docs"
 	"canteen-app/internal/adapter/http/common"
 	"canteen-app/internal/usecase"
 
@@ -28,18 +29,39 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.
 	}
 }
 
-type registerRequest struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname" binding:"required"`
-	Role     string `json:"role" binding:"required"`
+type accessTokenResponse struct {
+	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
+type errorResponse struct {
+	Error string `json:"error" example:"err"`
+}
+
+type registerRequest struct {
+	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
+	Password string `json:"password" binding:"required" example:"password1234"`
+	Name     string `json:"name" binding:"required" example:"Slim"`
+	Surname  string `json:"surname" binding:"required" example:"Shady"`
+	Role     string `json:"role" binding:"required" example:"admin"`
+}
+
+// Register godoc
+//
+//	@Summary		Регистрация пользователя
+//	@Description	Создает нового пользователя, устанавливает refresh токен в cookie и возвращает access токен в теле ответа.
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			input	body		registerRequest		true	"Данные для регистрации"
+//	@Success		201		{object}	accessTokenResponse	"Пользователь успешно зарегистрирован"
+//	@Failure		400		{object}	errorResponse		"Некорректный запрос"
+//	@Failure		409		{object}	errorResponse		"Пользователь с таким логином уже существует"
+//	@Failure		500		{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Router			/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid request"})
 		return
 	}
 
@@ -60,18 +82,31 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	c.JSON(http.StatusCreated, gin.H{"access_token": tokens.AccessToken})
+	c.JSON(http.StatusCreated, accessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
 type loginRequest struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
+	Password string `json:"password" binding:"required" example:"password1234"`
 }
 
+// Login godoc
+//
+//	@Summary		Аутентификация пользователя
+//	@Description	Аутентифицирует существующего пользователя, устанавливает refresh токен в cookie и возвращает access токен в теле ответа.
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			input	body		loginRequest		true	"Данные для входа"
+//	@Success		200		{object}	accessTokenResponse	"Пользователь успешно аутентифицирован"
+//	@Failure		400		{object}	errorResponse		"Некорректный запрос"
+//	@Failure		401		{object}	errorResponse		"Логин/пароль некорректен"
+//	@Failure		500		{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Router			/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid request"})
 		return
 	}
 
@@ -92,13 +127,23 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	c.JSON(http.StatusOK, gin.H{"access_token": tokens.AccessToken})
+	c.JSON(http.StatusOK, accessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
+// Refresh godoc
+//
+//	@Summary		Обновление access токена
+//	@Description	Проверяет refresh токен, установленный в cookie, и возврашает в теле ответа новый access токен
+//	@Tags			auth
+//	@Produce		json
+//	@Success		200	{object}	accessTokenResponse	"access токен успешно обновлен"
+//	@Failure		401	{object}	errorResponse		"Refresh токен не установлен"
+//	@Failure		500	{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Router			/auth/refresh [get]
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "no refresh token"})
+		c.JSON(http.StatusUnauthorized, errorResponse{Error: "no refresh token"})
 		return
 	}
 
@@ -118,9 +163,16 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
-	c.JSON(http.StatusOK, gin.H{"access_token": tokens.AccessToken})
+	c.JSON(http.StatusOK, accessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
+// Logout godoc
+//
+//	@Summary		Выход из системы
+//	@Description	Инвалидирует refresh токен в cookie
+//	@Tags			auth
+//	@Success		204	"Успешный выход, тело ответа отсутствует"
+//	@Router			/auth/logout [post]
 func (ah *AuthHandler) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err == nil && refreshToken != "" {

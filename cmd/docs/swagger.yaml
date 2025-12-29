@@ -1,0 +1,161 @@
+basePath: /api
+definitions:
+  api.accessTokenResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  api.errorResponse:
+    properties:
+      error:
+        example: err
+        type: string
+    type: object
+  api.loginRequest:
+    properties:
+      login:
+        example: the_real_slim_shady
+        type: string
+      password:
+        example: password1234
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  api.registerRequest:
+    properties:
+      login:
+        example: the_real_slim_shady
+        type: string
+      name:
+        example: Slim
+        type: string
+      password:
+        example: password1234
+        type: string
+      role:
+        example: admin
+        type: string
+      surname:
+        example: Shady
+        type: string
+    required:
+    - login
+    - name
+    - password
+    - role
+    - surname
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Internal API for canteen web app
+  license:
+    name: Apache 2.0
+  title: CanteenApp API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентифицирует существующего пользователя, устанавливает refresh
+        токен в cookie и возвращает access токен в теле ответа.
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно аутентифицирован
+          schema:
+            $ref: '#/definitions/api.accessTokenResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "401":
+          description: Логин/пароль некорректен
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Инвалидирует refresh токен в cookie
+      responses:
+        "204":
+          description: Успешный выход, тело ответа отсутствует
+      summary: Выход из системы
+      tags:
+      - auth
+  /auth/refresh:
+    get:
+      description: Проверяет refresh токен, установленный в cookie, и возврашает в
+        теле ответа новый access токен
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: access токен успешно обновлен
+          schema:
+            $ref: '#/definitions/api.accessTokenResponse'
+        "401":
+          description: Refresh токен не установлен
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      summary: Обновление access токена
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя, устанавливает refresh токен в cookie
+        и возвращает access токен в теле ответа.
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно зарегистрирован
+          schema:
+            $ref: '#/definitions/api.accessTokenResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "409":
+          description: Пользователь с таким логином уже существует
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      summary: Регистрация пользователя
+      tags:
+      - auth
+swagger: "2.0"
