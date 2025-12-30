@@ -52,11 +52,11 @@ type registerRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		registerRequest		true	"Данные для регистрации"
-//	@Success		201		{object}	accessTokenResponse	"Пользователь успешно зарегистрирован"
-//	@Failure		400		{object}	errorResponse		"Некорректный запрос"
-//	@Failure		409		{object}	errorResponse		"Пользователь с таким логином уже существует"
-//	@Failure		500		{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Param			input	body		registerRequest				true	"Данные для регистрации"
+//	@Success		201		{object}	accessTokenResponse			"Пользователь успешно зарегистрирован"
+//	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
+//	@Failure		409		{object}	UserExistsErrorResponse		"Пользователь с таким логином уже существует"
+//	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
@@ -97,11 +97,11 @@ type loginRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		loginRequest		true	"Данные для входа"
-//	@Success		200		{object}	accessTokenResponse	"Пользователь успешно аутентифицирован"
-//	@Failure		400		{object}	errorResponse		"Некорректный запрос"
-//	@Failure		401		{object}	errorResponse		"Логин/пароль некорректен"
-//	@Failure		500		{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Param			input	body		loginRequest					true	"Данные для входа"
+//	@Success		200		{object}	accessTokenResponse				"Пользователь успешно аутентифицирован"
+//	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
+//	@Failure		401		{object}	InvalidCredentialsErrorResponse	"Логин/пароль некорректен"
+//	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
 //	@Router			/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
@@ -136,9 +136,9 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 //	@Description	Проверяет refresh токен, установленный в cookie, и возврашает в теле ответа новый access токен
 //	@Tags			auth
 //	@Produce		json
-//	@Success		200	{object}	accessTokenResponse	"access токен успешно обновлен"
-//	@Failure		401	{object}	errorResponse		"Refresh токен не установлен"
-//	@Failure		500	{object}	errorResponse		"Внутренняя ошибка сервера"
+//	@Success		200	{object}	accessTokenResponse			"access токен успешно обновлен"
+//	@Failure		401	{object}	RefreshTokenErrorResponse	"Refresh токен не установлен или некорректен"
+//	@Failure		500	{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/auth/refresh [get]
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")

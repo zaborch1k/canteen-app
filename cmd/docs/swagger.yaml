@@ -1,15 +1,39 @@
 basePath: /api
 definitions:
+  api.InternalServerErrorResponse:
+    properties:
+      error:
+        example: internal server error
+        type: string
+    type: object
+  api.InvalidCredentialsErrorResponse:
+    properties:
+      error:
+        example: invalid credentials
+        type: string
+    type: object
+  api.InvalidRequestErrorResponse:
+    properties:
+      error:
+        example: invalid request
+        type: string
+    type: object
+  api.RefreshTokenErrorResponse:
+    properties:
+      error:
+        example: refresh token error
+        type: string
+    type: object
+  api.UserExistsErrorResponse:
+    properties:
+      error:
+        example: user already exists
+        type: string
+    type: object
   api.accessTokenResponse:
     properties:
       access_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        type: string
-    type: object
-  api.errorResponse:
-    properties:
-      error:
-        example: err
         type: string
     type: object
   api.loginRequest:
@@ -80,15 +104,15 @@ paths:
         "400":
           description: Некорректный запрос
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InvalidRequestErrorResponse'
         "401":
           description: Логин/пароль некорректен
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InvalidCredentialsErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InternalServerErrorResponse'
       summary: Аутентификация пользователя
       tags:
       - auth
@@ -113,13 +137,13 @@ paths:
           schema:
             $ref: '#/definitions/api.accessTokenResponse'
         "401":
-          description: Refresh токен не установлен
+          description: Refresh токен не установлен или некорректен
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.RefreshTokenErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InternalServerErrorResponse'
       summary: Обновление access токена
       tags:
       - auth
@@ -146,15 +170,15 @@ paths:
         "400":
           description: Некорректный запрос
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InvalidRequestErrorResponse'
         "409":
           description: Пользователь с таким логином уже существует
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.UserExistsErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/api.errorResponse'
+            $ref: '#/definitions/api.InternalServerErrorResponse'
       summary: Регистрация пользователя
       tags:
       - auth

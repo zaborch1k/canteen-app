@@ -52,19 +52,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InvalidRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Логин/пароль некорректен",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InvalidCredentialsErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InternalServerErrorResponse"
                         }
                     }
                 }
@@ -102,15 +102,15 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Refresh токен не установлен",
+                        "description": "Refresh токен не установлен или некорректен",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.RefreshTokenErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InternalServerErrorResponse"
                         }
                     }
                 }
@@ -150,19 +150,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InvalidRequestErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Пользователь с таким логином уже существует",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.UserExistsErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
+                            "$ref": "#/definitions/api.InternalServerErrorResponse"
                         }
                     }
                 }
@@ -170,21 +170,57 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.InternalServerErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "internal server error"
+                }
+            }
+        },
+        "api.InvalidCredentialsErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "invalid credentials"
+                }
+            }
+        },
+        "api.InvalidRequestErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "invalid request"
+                }
+            }
+        },
+        "api.RefreshTokenErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "refresh token error"
+                }
+            }
+        },
+        "api.UserExistsErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "user already exists"
+                }
+            }
+        },
         "api.accessTokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                }
-            }
-        },
-        "api.errorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "err"
                 }
             }
         },
