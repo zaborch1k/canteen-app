@@ -31,7 +31,7 @@ func (ur UserRepo) GetUserByID(id domUser.UserID) (*domUser.User, error) {
 	if user, ok := ur.Users[id]; ok {
 		return &user, nil
 	}
-	return &domUser.User{}, usecase.ErrInvalidCredentials
+	return &domUser.User{}, usecase.ErrUserNotFound
 }
 
 func (uc UserRepo) GetUserByLogin(login string) (*domUser.User, error) {
