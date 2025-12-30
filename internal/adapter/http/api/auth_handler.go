@@ -29,11 +29,11 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.
 	}
 }
 
-type accessTokenResponse struct {
+type AccessTokenResponse struct {
 	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
-type registerRequest struct {
+type RegisterRequest struct {
 	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
 	Password string `json:"password" binding:"required" example:"password1234"`
 	Name     string `json:"name" binding:"required" example:"Slim"`
@@ -48,14 +48,14 @@ type registerRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		registerRequest				true	"Данные для регистрации"
-//	@Success		201		{object}	accessTokenResponse			"Пользователь успешно зарегистрирован"
+//	@Param			input	body		RegisterRequest				true	"Данные для регистрации"
+//	@Success		201		{object}	AccessTokenResponse			"Пользователь успешно зарегистрирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
 //	@Failure		409		{object}	UserExistsErrorResponse		"Пользователь с таким логином уже существует"
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
-	var req registerRequest
+	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, ErrInvalidRequest)
 		return
@@ -78,10 +78,10 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	c.JSON(http.StatusCreated, accessTokenResponse{AccessToken: tokens.AccessToken})
+	c.JSON(http.StatusCreated, AccessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
-type loginRequest struct {
+type LoginRequest struct {
 	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
 	Password string `json:"password" binding:"required" example:"password1234"`
 }
@@ -93,14 +93,14 @@ type loginRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		loginRequest					true	"Данные для входа"
-//	@Success		200		{object}	accessTokenResponse				"Пользователь успешно аутентифицирован"
+//	@Param			input	body		LoginRequest					true	"Данные для входа"
+//	@Success		200		{object}	AccessTokenResponse				"Пользователь успешно аутентифицирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
 //	@Failure		401		{object}	InvalidCredentialsErrorResponse	"Логин/пароль некорректен"
 //	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
 //	@Router			/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
-	var req loginRequest
+	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, ErrInvalidRequest)
 		return
@@ -123,7 +123,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	c.JSON(http.StatusOK, accessTokenResponse{AccessToken: tokens.AccessToken})
+	c.JSON(http.StatusOK, AccessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
 // Refresh godoc
@@ -132,7 +132,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 //	@Description	Проверяет refresh токен, установленный в cookie, и возврашает в теле ответа новый access токен
 //	@Tags			auth
 //	@Produce		json
-//	@Success		200	{object}	accessTokenResponse			"access токен успешно обновлен"
+//	@Success		200	{object}	AccessTokenResponse			"access токен успешно обновлен"
 //	@Failure		401	{object}	RefreshTokenErrorResponse	"Refresh токен не установлен или некорректен"
 //	@Failure		500	{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/auth/refresh [get]
@@ -159,7 +159,7 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
-	c.JSON(http.StatusOK, accessTokenResponse{AccessToken: tokens.AccessToken})
+	c.JSON(http.StatusOK, AccessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
 // Logout godoc

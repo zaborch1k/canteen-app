@@ -1,5 +1,11 @@
 basePath: /api
 definitions:
+  api.AccessTokenResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
   api.InternalServerErrorResponse:
     properties:
       error:
@@ -18,25 +24,7 @@ definitions:
         example: invalid request
         type: string
     type: object
-  api.RefreshTokenErrorResponse:
-    properties:
-      error:
-        example: refresh token error
-        type: string
-    type: object
-  api.UserExistsErrorResponse:
-    properties:
-      error:
-        example: user already exists
-        type: string
-    type: object
-  api.accessTokenResponse:
-    properties:
-      access_token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        type: string
-    type: object
-  api.loginRequest:
+  api.LoginRequest:
     properties:
       login:
         example: the_real_slim_shady
@@ -48,7 +36,13 @@ definitions:
     - login
     - password
     type: object
-  api.registerRequest:
+  api.RefreshTokenErrorResponse:
+    properties:
+      error:
+        example: refresh token error
+        type: string
+    type: object
+  api.RegisterRequest:
     properties:
       login:
         example: the_real_slim_shady
@@ -72,6 +66,12 @@ definitions:
     - role
     - surname
     type: object
+  api.UserExistsErrorResponse:
+    properties:
+      error:
+        example: user already exists
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -93,14 +93,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.loginRequest'
+          $ref: '#/definitions/api.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Пользователь успешно аутентифицирован
           schema:
-            $ref: '#/definitions/api.accessTokenResponse'
+            $ref: '#/definitions/api.AccessTokenResponse'
         "400":
           description: Некорректный запрос
           schema:
@@ -135,7 +135,7 @@ paths:
         "200":
           description: access токен успешно обновлен
           schema:
-            $ref: '#/definitions/api.accessTokenResponse'
+            $ref: '#/definitions/api.AccessTokenResponse'
         "401":
           description: Refresh токен не установлен или некорректен
           schema:
@@ -159,14 +159,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.registerRequest'
+          $ref: '#/definitions/api.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Пользователь успешно зарегистрирован
           schema:
-            $ref: '#/definitions/api.accessTokenResponse'
+            $ref: '#/definitions/api.AccessTokenResponse'
         "400":
           description: Некорректный запрос
           schema:

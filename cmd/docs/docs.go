@@ -38,7 +38,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.loginRequest"
+                            "$ref": "#/definitions/api.LoginRequest"
                         }
                     }
                 ],
@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Пользователь успешно аутентифицирован",
                         "schema": {
-                            "$ref": "#/definitions/api.accessTokenResponse"
+                            "$ref": "#/definitions/api.AccessTokenResponse"
                         }
                     },
                     "400": {
@@ -98,7 +98,7 @@ const docTemplate = `{
                     "200": {
                         "description": "access токен успешно обновлен",
                         "schema": {
-                            "$ref": "#/definitions/api.accessTokenResponse"
+                            "$ref": "#/definitions/api.AccessTokenResponse"
                         }
                     },
                     "401": {
@@ -136,7 +136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.registerRequest"
+                            "$ref": "#/definitions/api.RegisterRequest"
                         }
                     }
                 ],
@@ -144,7 +144,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Пользователь успешно зарегистрирован",
                         "schema": {
-                            "$ref": "#/definitions/api.accessTokenResponse"
+                            "$ref": "#/definitions/api.AccessTokenResponse"
                         }
                     },
                     "400": {
@@ -170,6 +170,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.AccessTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
         "api.InternalServerErrorResponse": {
             "type": "object",
             "properties": {
@@ -197,34 +206,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.RefreshTokenErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "refresh token error"
-                }
-            }
-        },
-        "api.UserExistsErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "user already exists"
-                }
-            }
-        },
-        "api.accessTokenResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                }
-            }
-        },
-        "api.loginRequest": {
+        "api.LoginRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -241,7 +223,16 @@ const docTemplate = `{
                 }
             }
         },
-        "api.registerRequest": {
+        "api.RefreshTokenErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "refresh token error"
+                }
+            }
+        },
+        "api.RegisterRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -270,6 +261,15 @@ const docTemplate = `{
                 "surname": {
                     "type": "string",
                     "example": "Shady"
+                }
+            }
+        },
+        "api.UserExistsErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "user already exists"
                 }
             }
         }
