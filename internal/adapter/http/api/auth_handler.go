@@ -33,10 +33,6 @@ type accessTokenResponse struct {
 	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
-type errorResponse struct {
-	Error string `json:"error" example:"err"`
-}
-
 type registerRequest struct {
 	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
 	Password string `json:"password" binding:"required" example:"password1234"`
@@ -61,7 +57,7 @@ type registerRequest struct {
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid request"})
+		writeError(c, ErrInvalidRequest)
 		return
 	}
 
@@ -106,7 +102,7 @@ type loginRequest struct {
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid request"})
+		writeError(c, ErrInvalidRequest)
 		return
 	}
 
@@ -143,7 +139,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, errorResponse{Error: "no refresh token"})
+		writeError(c, ErrRefreshTokenError)
 		return
 	}
 

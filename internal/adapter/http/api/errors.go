@@ -1,5 +1,12 @@
 package api
 
+import "errors"
+
+var (
+	ErrInvalidRequest    = errors.New("invalid request")
+	ErrRefreshTokenError = errors.New("no refresh token")
+)
+
 type InternalServerErrorResponse struct {
 	Error string `json:"error" example:"internal server error"`
 }
