@@ -26,7 +26,7 @@ func New() (*App, error) {
 	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), []byte("SECRET2"), accessTTL, refreshTTL, "issuer")
 	bhasher := security.BcryptHasher{}
 	authUC := usecase.NewAuthUseCase(userRepo, tokenSvc, refreshRepo, bhasher)
-	router := http.NewRouter(authUC, tokenSvc, refreshTTL)
+	router := http.NewRouter(authUC, refreshTTL)
 
 	return &App{
 		router: router,
