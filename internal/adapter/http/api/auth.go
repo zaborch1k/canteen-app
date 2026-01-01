@@ -7,7 +7,6 @@ import (
 
 	_ "canteen-app/cmd/docs"
 	"canteen-app/internal/adapter/http/common"
-	"canteen-app/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,7 @@ type AuthHandler struct {
 	refreshTTL time.Duration
 }
 
-func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, tokens usecase.TokenService, refreshTTL time.Duration) {
+func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, refreshTTL time.Duration) {
 	handler := &AuthHandler{auth: auth, refreshTTL: refreshTTL}
 
 	{
