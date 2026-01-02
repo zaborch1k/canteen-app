@@ -163,3 +163,128 @@ func TestAuthHandler_Register(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthHandler_Login(t *testing.T) {
+	tests := []struct {
+		name           string
+		requestBody    map[string]string
+		setupAuthUC    func(m *mocks.AuthUseCase)
+		wantStatusCode int
+		wantErrorText  string
+	}{
+		{
+			name: "success",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+			},
+
+			setupAuthUC: func(m *mocks.AuthUseCase) {
+				m.On("Login", "the_real_slim_shady", "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj").Return(
+					&domAuth.Tokens{
+						AccessToken:  "access_token",
+						RefreshToken: "refresh_token",
+					}, nil).Once()
+			},
+
+			wantStatusCode: http.StatusOK,
+			wantErrorText:  "",
+		},
+
+		{
+			name: "missing required field",
+			requestBody: map[string]string{
+				"login": "the_real_slim_shady",
+			},
+
+			wantStatusCode: http.StatusBadRequest,
+			wantErrorText:  "invalid request",
+		},
+
+		{
+			name: "invalid credentials",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+			},
+
+			setupAuthUC: func(m *mocks.AuthUseCase) {
+				m.On("Login", "the_real_slim_shady", "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj").Return(
+					func(login, password string) (*domAuth.Tokens, error) {
+						return &domAuth.Tokens{}, usecase.ErrInvalidCredentials
+					},
+				).Once()
+			},
+
+			wantStatusCode: http.StatusUnauthorized,
+			wantErrorText:  "invalid credentials",
+		},
+
+		{
+			name: "internal server error",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+			},
+
+			setupAuthUC: func(m *mocks.AuthUseCase) {
+				m.On("Login", "the_real_slim_shady", "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj").Return(
+					func(login, password string) (*domAuth.Tokens, error) {
+						return &domAuth.Tokens{}, errors.New("error")
+					},
+				).Once()
+			},
+
+			wantStatusCode: http.StatusInternalServerError,
+			wantErrorText:  "internal server error",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			authUC := mocks.NewAuthUseCase(t)
+
+			if tc.setupAuthUC != nil {
+				tc.setupAuthUC(authUC)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+
+			bodyBytes, err := json.Marshal(tc.requestBody)
+			req, err := http.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewReader(bodyBytes))
+			require.NoError(t, err)
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.wantStatusCode, w.Code)
+
+			var resp map[string]interface{}
+			err = json.Unmarshal(w.Body.Bytes(), &resp)
+			require.NoError(t, err)
+
+			if tc.wantErrorText != "" {
+				assert.Equal(t, tc.wantErrorText, resp["error"])
+			} else {
+				assert.Equal(t, "access_token", resp["access_token"])
+
+				cookies := w.Result().Cookies()
+				require.NotEmpty(t, cookies)
+
+				cookie := cookies[0]
+
+				assert.Equal(t, false, cookie.Secure)
+				assert.Equal(t, true, cookie.HttpOnly)
+				assert.Equal(t, "/", cookie.Path)
+				assert.Equal(t, "", cookie.Domain)
+				assert.Equal(t, http.SameSiteLaxMode, cookie.SameSite)
+				assert.NotEmpty(t, cookie.Expires)
+				assert.Equal(t, "refresh_token", cookie.Name)
+				assert.Equal(t, "refresh_token", cookie.Value)
+			}
+
+			authUC.AssertExpectations(t)
+		})
+	}
+}
