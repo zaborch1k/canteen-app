@@ -431,3 +431,106 @@ func TestAuthHandler_Refresh(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthHandler_Logout(t *testing.T) {
+	refreshTTL := 30 * time.Minute
+
+	tests := []struct {
+		name           string
+		requestBody    map[string]string
+		cookie         http.Cookie
+		setupAuthUC    func(m *mocks.AuthUseCase)
+		wantStatusCode int
+		wantErrorText  string
+	}{
+		{
+			name: "success",
+
+			cookie: http.Cookie{
+				Name:     "refresh_token",
+				Value:    "refresh_token",
+				Path:     "/",
+				Domain:   "",
+				Expires:  time.Now().Add(refreshTTL),
+				HttpOnly: true,
+				Secure:   false,
+				SameSite: http.SameSiteLaxMode,
+			},
+
+			setupAuthUC: func(m *mocks.AuthUseCase) {
+				m.On("RevokeRefreshToken", "refresh_token").Return(nil).Once()
+			},
+
+			wantStatusCode: http.StatusNoContent,
+			wantErrorText:  "",
+		},
+
+		{
+			name: "success no refresh token",
+
+			wantStatusCode: http.StatusNoContent,
+			wantErrorText:  "",
+		},
+
+		{
+			name: "success invalid refresh token",
+
+			cookie: http.Cookie{
+				Name:     "refresh_token",
+				Value:    "refresh_token",
+				Path:     "/",
+				Domain:   "",
+				Expires:  time.Now().Add(refreshTTL),
+				HttpOnly: true,
+				Secure:   false,
+				SameSite: http.SameSiteLaxMode,
+			},
+
+			setupAuthUC: func(m *mocks.AuthUseCase) {
+				m.On("RevokeRefreshToken", "refresh_token").Return(usecase.ErrInvalidRefresh).Once()
+			},
+
+			wantStatusCode: http.StatusNoContent,
+			wantErrorText:  "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			authUC := mocks.NewAuthUseCase(t)
+
+			if tc.setupAuthUC != nil {
+				tc.setupAuthUC(authUC)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+
+			bodyBytes, err := json.Marshal(tc.requestBody)
+			req, err := http.NewRequest(http.MethodPost, "/api/auth/logout", bytes.NewReader(bodyBytes))
+			require.NoError(t, err)
+			req.Header.Set("Content-Type", "application/json")
+			req.AddCookie(&tc.cookie)
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.wantStatusCode, w.Code)
+
+			cookies := w.Result().Cookies()
+			require.NotEmpty(t, cookies)
+
+			cookie := cookies[0]
+
+			assert.Equal(t, false, cookie.Secure)
+			assert.Equal(t, true, cookie.HttpOnly)
+			assert.Equal(t, "/", cookie.Path)
+			assert.Equal(t, "", cookie.Domain)
+			assert.Equal(t, http.SameSiteLaxMode, cookie.SameSite)
+			assert.Equal(t, "refresh_token", cookie.Name)
+			assert.Equal(t, "", cookie.Value)
+			assert.Equal(t, -1, cookie.MaxAge)
+
+			authUC.AssertExpectations(t)
+		})
+	}
+}
