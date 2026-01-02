@@ -1,0 +1,20 @@
+all: false
+dir: '{{.InterfaceDir}}'
+filename: mocks.go
+force-file-write: true
+formatter: goimports
+generate: true
+include-auto-generated: false
+log-level: info
+structname: '{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+template: testify
+packages:
+  canteen-app/internal/adapter/http/common:
+    config:
+      all: false
+      dir: internal/adapter/http/api/mocks
+      pkgname: mocks
+      include-interface-regex: AuthUseCase
+      filename: AuthUseCase.go
