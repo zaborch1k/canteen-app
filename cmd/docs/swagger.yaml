@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   api.AccessTokenResponse:
     properties:
@@ -81,7 +80,7 @@ info:
   title: CanteenApp API
   version: "1.0"
 paths:
-  /auth/login:
+  /api/auth/login:
     post:
       consumes:
       - application/json
@@ -116,7 +115,7 @@ paths:
       summary: Аутентификация пользователя
       tags:
       - auth
-  /auth/logout:
+  /api/auth/logout:
     post:
       description: Инвалидирует refresh токен в cookie
       responses:
@@ -125,7 +124,7 @@ paths:
       summary: Выход из системы
       tags:
       - auth
-  /auth/refresh:
+  /api/auth/refresh:
     get:
       description: Проверяет refresh токен, установленный в cookie, и возврашает в
         теле ответа новый access токен
@@ -147,7 +146,7 @@ paths:
       summary: Обновление access токена
       tags:
       - auth
-  /auth/register:
+  /api/auth/register:
     post:
       consumes:
       - application/json

@@ -18,7 +18,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/auth/login": {
             "post": {
                 "description": "Аутентифицирует существующего пользователя, устанавливает refresh токен в cookie и возвращает access токен в теле ответа.",
                 "consumes": [
@@ -70,7 +70,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/logout": {
+        "/api/auth/logout": {
             "post": {
                 "description": "Инвалидирует refresh токен в cookie",
                 "tags": [
@@ -84,7 +84,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/refresh": {
+        "/api/auth/refresh": {
             "get": {
                 "description": "Проверяет refresh токен, установленный в cookie, и возврашает в теле ответа новый access токен",
                 "produces": [
@@ -116,7 +116,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/register": {
+        "/api/auth/register": {
             "post": {
                 "description": "Создает нового пользователя, устанавливает refresh токен в cookie и возвращает access токен в теле ответа.",
                 "consumes": [
@@ -280,7 +280,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "CanteenApp API",
 	Description:      "Internal API for canteen web app",

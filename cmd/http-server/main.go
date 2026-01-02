@@ -11,7 +11,6 @@ import (
 //	@description	Internal API for canteen web app
 //	@license.name	Apache 2.0
 //	@host			localhost:8080
-//	@BasePath		/api
 
 func main() {
 	a, err := app.New()

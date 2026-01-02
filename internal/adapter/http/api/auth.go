@@ -52,7 +52,7 @@ type RegisterRequest struct {
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
 //	@Failure		409		{object}	UserExistsErrorResponse		"Пользователь с таким логином уже существует"
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
-//	@Router			/auth/register [post]
+//	@Router			/api/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -97,7 +97,7 @@ type LoginRequest struct {
 //	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
 //	@Failure		401		{object}	InvalidCredentialsErrorResponse	"Логин/пароль некорректен"
 //	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
-//	@Router			/auth/login [post]
+//	@Router			/api/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -134,7 +134,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 //	@Success		200	{object}	AccessTokenResponse			"access токен успешно обновлен"
 //	@Failure		401	{object}	RefreshTokenErrorResponse	"Refresh токен не установлен или некорректен"
 //	@Failure		500	{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
-//	@Router			/auth/refresh [get]
+//	@Router			/api/auth/refresh [get]
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -167,7 +167,7 @@ func (ah *AuthHandler) Refresh(c *gin.Context) {
 //	@Description	Инвалидирует refresh токен в cookie
 //	@Tags			auth
 //	@Success		204	"Успешный выход, тело ответа отсутствует"
-//	@Router			/auth/logout [post]
+//	@Router			/api/auth/logout [post]
 func (ah *AuthHandler) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err == nil && refreshToken != "" {
