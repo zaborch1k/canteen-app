@@ -84,6 +84,14 @@ func (uc *authUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	return user, nil
 }
 
+func (uc *authUseCase) GetUserByID(userID domUser.UserID) (*domUser.User, error) {
+	user, err := uc.users.GetUserByID(userID)
+	if err != nil {
+		return &domUser.User{}, err
+	}
+	return user, nil
+}
+
 func (uc *authUseCase) Refresh(refreshToken string) (*domAuth.Tokens, error) {
 	userID, tokenID, err := uc.tokens.ParseRefreshToken(refreshToken)
 	if err != nil {

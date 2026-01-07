@@ -9,6 +9,7 @@ type AuthUseCase interface {
 	Register(login, password, name, surname, role string) (*domAuth.Tokens, error)
 	Login(login, password string) (*domAuth.Tokens, error)
 	GetUserByLogin(login string) (*domUser.User, error)
+	GetUserByID(userID domUser.UserID) (*domUser.User, error)
 	Refresh(refreshToken string) (*domAuth.Tokens, error)
 	RevokeRefreshToken(refreshToken string) error
 }
