@@ -24,7 +24,54 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, accessTTL time.
 
 	router.LoadHTMLGlob("internal/adapter/http/web/templates/*")
 
+	router.GET("/register", handler.RegisterGET)
+	router.POST("/register", handler.RegisterPOST)
+
 	router.GET("/home", AuthMiddleware(handler.tokenSvc), handler.HomeGET)
+}
+
+func (ah *AuthHandler) RegisterGET(c *gin.Context) {
+	reason := getFlash(c, "flash_auth")
+	c.HTML(http.StatusOK, "register.html", gin.H{
+		"reason": reason,
+	})
+}
+
+type RegisterFormData struct {
+	Login    string
+	Password string
+	Name     string
+	Surname  string
+	Role     string
+}
+
+func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
+	formData := RegisterFormData{}
+	formData.Login = c.PostForm("login")
+	formData.Name = c.PostForm("name")
+	formData.Surname = c.PostForm("surname")
+	formData.Password = c.PostForm("password")
+	formData.Role = c.PostForm("role")
+
+	tokens, err := ah.auth.Register(formData.Login, formData.Password, formData.Name, formData.Surname, formData.Role)
+	if err != nil {
+		_, msg := common.ErrorToHTTP(err)
+		redirectToLogin(c, msg)
+		return
+	}
+
+	c.SetCookieData(&http.Cookie{
+		Name:     "access_token",
+		Value:    tokens.AccessToken,
+		Path:     "/",
+		Domain:   "",
+		Expires:  time.Now().Add(ah.accessTTL),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	c.Redirect(http.StatusSeeOther, "/home")
 }
 
 func (ah *AuthHandler) HomeGET(c *gin.Context) {
