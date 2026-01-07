@@ -56,7 +56,7 @@ type RegisterRequest struct {
 func (ah *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		writeError(c, ErrInvalidRequest)
+		writeError(c, common.ErrInvalidRequest)
 		return
 	}
 
@@ -101,7 +101,7 @@ type LoginRequest struct {
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		writeError(c, ErrInvalidRequest)
+		writeError(c, common.ErrInvalidRequest)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		writeError(c, ErrRefreshTokenError)
+		writeError(c, common.ErrRefreshTokenError)
 		return
 	}
 
