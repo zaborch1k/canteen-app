@@ -8,7 +8,7 @@ import (
 
 func redirectToLogin(c *gin.Context, reason string) {
 	c.SetCookie("flash_auth", reason, 60, "/", "", true, true)
-	c.Redirect(http.StatusSeeOther, "/register")
+	c.Redirect(http.StatusSeeOther, "/login")
 	c.Abort()
 }
 
