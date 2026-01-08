@@ -15,6 +15,10 @@ type UserExistsErrorResponse struct {
 	Error string `json:"error" example:"user already exists"`
 }
 
+type LoginInUseErrorResponse struct {
+	Error string `json:"error" example:"login already in use"`
+}
+
 type RefreshTokenErrorResponse struct {
 	Error string `json:"error" example:"refresh token error"`
 }

@@ -156,7 +156,7 @@ const docTemplate = `{
                     "409": {
                         "description": "Пользователь с таким логином уже существует",
                         "schema": {
-                            "$ref": "#/definitions/api.UserExistsErrorResponse"
+                            "$ref": "#/definitions/api.LoginInUseErrorResponse"
                         }
                     },
                     "500": {
@@ -203,6 +203,15 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "invalid request"
+                }
+            }
+        },
+        "api.LoginInUseErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "login already in use"
                 }
             }
         },
@@ -261,15 +270,6 @@ const docTemplate = `{
                 "surname": {
                     "type": "string",
                     "example": "Shady"
-                }
-            }
-        },
-        "api.UserExistsErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "user already exists"
                 }
             }
         }

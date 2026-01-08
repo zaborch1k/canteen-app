@@ -40,5 +40,5 @@ func (uc UserRepo) GetUserByLogin(login string) (*domUser.User, error) {
 			return &val, nil
 		}
 	}
-	return &domUser.User{}, usecase.ErrInvalidCredentials
+	return &domUser.User{}, usecase.ErrUserNotFound
 }

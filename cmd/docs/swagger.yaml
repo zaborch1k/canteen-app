@@ -23,6 +23,12 @@ definitions:
         example: invalid request
         type: string
     type: object
+  api.LoginInUseErrorResponse:
+    properties:
+      error:
+        example: login already in use
+        type: string
+    type: object
   api.LoginRequest:
     properties:
       login:
@@ -64,12 +70,6 @@ definitions:
     - password
     - role
     - surname
-    type: object
-  api.UserExistsErrorResponse:
-    properties:
-      error:
-        example: user already exists
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -173,7 +173,7 @@ paths:
         "409":
           description: Пользователь с таким логином уже существует
           schema:
-            $ref: '#/definitions/api.UserExistsErrorResponse'
+            $ref: '#/definitions/api.LoginInUseErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:

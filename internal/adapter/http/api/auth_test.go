@@ -83,13 +83,13 @@ func TestAuthHandler_Register(t *testing.T) {
 			setupAuthUC: func(m *mocks.AuthUseCase) {
 				m.On("Register", "the_real_slim_shady", "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj", "Slim", "Shady", "admin").Return(
 					func(login, password, name, surname, role string) (*domAuth.Tokens, error) {
-						return &domAuth.Tokens{}, usecase.ErrUserExists
+						return &domAuth.Tokens{}, usecase.ErrLoginInUse
 					},
 				).Once()
 			},
 
 			wantStatusCode: http.StatusConflict,
-			wantErrorText:  "user already exists",
+			wantErrorText:  "login already in use",
 		},
 
 		{

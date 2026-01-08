@@ -28,6 +28,9 @@ func ErrorToHTTP(err error) (code int, msg string) {
 	case errors.Is(err, usecase.ErrUserExists):
 		return http.StatusConflict, "user already exists"
 
+	case errors.Is(err, usecase.ErrLoginInUse):
+		return http.StatusConflict, "login already in use"
+
 	default:
 		return http.StatusInternalServerError, "internal server error"
 	}

@@ -18,7 +18,7 @@ func NewAuthUseCase(users UserRepository, tokens TokenService, refreshRepo Refre
 
 func (uc *authUseCase) Register(login, password, name, surname, role string) (*domAuth.Tokens, error) {
 	if _, err := uc.users.GetUserByLogin(login); err == nil {
-		return nil, ErrUserExists
+		return nil, ErrLoginInUse
 	}
 
 	hash, err := uc.hasher.Hash(password)

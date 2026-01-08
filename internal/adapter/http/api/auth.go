@@ -50,7 +50,7 @@ type RegisterRequest struct {
 //	@Param			input	body		RegisterRequest				true	"Данные для регистрации"
 //	@Success		201		{object}	AccessTokenResponse			"Пользователь успешно зарегистрирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
-//	@Failure		409		{object}	UserExistsErrorResponse		"Пользователь с таким логином уже существует"
+//	@Failure		409		{object}	LoginInUseErrorResponse		"Пользователь с таким логином уже существует"
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/api/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
