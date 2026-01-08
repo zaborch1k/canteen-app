@@ -6,7 +6,7 @@ import (
 	"canteen-app/internal/adapter/http"
 	jwtadapter "canteen-app/internal/adapter/jwt"
 	"canteen-app/internal/adapter/repo/ram_storage"
-	"canteen-app/internal/adapter/security"
+	"canteen-app/internal/adapter/security/password"
 	"canteen-app/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ func New() (*App, error) {
 	refreshTTL := time.Hour * 24 * 30
 
 	tokenSvc := jwtadapter.NewJWTTokenService([]byte("SECRET"), []byte("SECRET2"), accessTTL, refreshTTL, "issuer")
-	bhasher := security.BcryptHasher{}
+	bhasher := password.BcryptHasher{}
 	authUC := usecase.NewAuthUseCase(userRepo, tokenSvc, refreshRepo, bhasher)
 	router := http.NewRouter(authUC, accessTTL, refreshTTL, tokenSvc)
 

@@ -1,4 +1,4 @@
-package security
+package password
 
 import (
 	"canteen-app/internal/usecase"
