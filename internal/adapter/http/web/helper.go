@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func redirectToLogin(c *gin.Context, reason string) {
+func redirectToAuthPage(c *gin.Context, path string, reason string) {
 	c.SetCookie("flash_auth", reason, 60, "/", "", true, true)
-	c.Redirect(http.StatusSeeOther, "/login")
+	c.Redirect(http.StatusSeeOther, path)
 	c.Abort()
 }
 

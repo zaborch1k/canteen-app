@@ -59,7 +59,7 @@ func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
 	tokens, err := ah.auth.Register(formData.Login, formData.Password, formData.Name, formData.Surname, formData.Role)
 	if err != nil {
 		_, msg := common.ErrorToHTTP(err)
-		redirectToLogin(c, msg)
+		redirectToAuthPage(c, "/register", msg)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (ah *AuthHandler) LoginPOST(c *gin.Context) {
 	tokens, err := ah.auth.Login(formData.Login, formData.Password)
 	if err != nil {
 		_, msg := common.ErrorToHTTP(err)
-		redirectToLogin(c, msg)
+		redirectToAuthPage(c, "/login", msg)
 		return
 	}
 
@@ -119,13 +119,13 @@ func (ah *AuthHandler) HomeGET(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok {
 		_, msg := common.ErrorToHTTP(errors.New("internal server error"))
-		redirectToLogin(c, msg)
+		redirectToAuthPage(c, "/login", msg)
 		return
 	}
 	user, err := ah.auth.GetUserByID(userID.(domUser.UserID))
 	if err != nil {
 		_, msg := common.ErrorToHTTP(err)
-		redirectToLogin(c, msg)
+		redirectToAuthPage(c, "/login", msg)
 		return
 	}
 	c.HTML(http.StatusOK, "index.html", gin.H{

@@ -12,14 +12,14 @@ func AuthMiddleware(tokenService usecase.TokenService) gin.HandlerFunc {
 		tokenStr, err := c.Cookie("access_token")
 		if err != nil {
 			log.Println(err.Error())
-			redirectToLogin(c, "")
+			redirectToAuthPage(c, "/login", "")
 			return
 		}
 
 		claims, err := tokenService.ParseAccessToken(tokenStr)
 		if err != nil {
 			log.Println(err.Error())
-			redirectToLogin(c, "")
+			redirectToAuthPage(c, "/login", "")
 			return
 		}
 
