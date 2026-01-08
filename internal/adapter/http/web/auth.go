@@ -25,18 +25,21 @@ func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, accessTTL time.
 	router.LoadHTMLGlob("internal/adapter/http/web/templates/*")
 
 	router.GET("/register", handler.RegisterGET)
-	router.POST("/register", handler.RegisterPOST)
+	router.POST("/register", CSRFMiddleware(), handler.RegisterPOST)
 
 	router.GET("/login", handler.LoginGET)
-	router.POST("/login", handler.LoginPOST)
+	router.POST("/login", CSRFMiddleware(), handler.LoginPOST)
 
 	router.GET("/home", AuthMiddleware(handler.tokenSvc), handler.HomeGET)
 }
 
 func (ah *AuthHandler) RegisterGET(c *gin.Context) {
 	reason := getFlash(c, "flash_auth")
+	csrfToken := setCsrfCookie(c)
+
 	c.HTML(http.StatusOK, "register.html", gin.H{
-		"reason": reason,
+		"reason":    reason,
+		"csrfToken": csrfToken,
 	})
 }
 
@@ -79,8 +82,10 @@ func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
 
 func (ah *AuthHandler) LoginGET(c *gin.Context) {
 	reason := getFlash(c, "flash_auth")
+	csrfToken := setCsrfCookie(c)
 	c.HTML(http.StatusOK, "login.html", gin.H{
-		"reason": reason,
+		"reason":    reason,
+		"csrfToken": csrfToken,
 	})
 }
 

@@ -2,6 +2,8 @@
 
 <html>
     <form action="/register" method="post">
+        <input type="hidden" name="csrf_token" value="{{ .csrfToken }}">
+
         {{if .reason}}
         <p>reason: {{.reason}}</p>
         {{end}}

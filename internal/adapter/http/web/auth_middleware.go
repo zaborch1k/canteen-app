@@ -1,6 +1,7 @@
 package web
 
 import (
+	"canteen-app/internal/adapter/security/csrf"
 	"canteen-app/internal/usecase"
 	"log"
 
@@ -25,6 +26,29 @@ func AuthMiddleware(tokenService usecase.TokenService) gin.HandlerFunc {
 
 		c.Set("userID", claims.UserID)
 		c.Set("userRole", claims.Role)
+		c.Next()
+	}
+}
+
+func CSRFMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cookieToken, err := c.Cookie("csrf_token")
+		if err != nil || cookieToken == "" {
+			denyCSRF(c, "missing_csrf_cookie")
+			return
+		}
+
+		formToken := c.PostForm("csrf_token")
+		if formToken == "" {
+			denyCSRF(c, "missing_csrf_form")
+			return
+		}
+
+		if !csrf.Compare(cookieToken, formToken) {
+			denyCSRF(c, "mismatch")
+			return
+		}
+
 		c.Next()
 	}
 }
