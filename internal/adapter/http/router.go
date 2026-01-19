@@ -14,13 +14,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(authUC common.AuthUseCase, accessTTL time.Duration, refreshTTL time.Duration, tokenSvc usecase.TokenService) *gin.Engine {
+func NewRouter(
+	authUC common.AuthUseCase,
+	accessTTL time.Duration,
+	refreshTTL time.Duration,
+	tokenSvc usecase.TokenService,
+	validator Validator,
+) *gin.Engine {
 	r := gin.Default()
 
 	api.NewAuthHandler(r, authUC, refreshTTL)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	web.NewAuthHandler(r, authUC, accessTTL, refreshTTL, tokenSvc)
+	web.NewAuthHandler(r, authUC, accessTTL, refreshTTL, tokenSvc, validator)
 
 	return r
 }

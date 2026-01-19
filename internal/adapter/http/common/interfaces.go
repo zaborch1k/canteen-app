@@ -13,3 +13,7 @@ type AuthUseCase interface {
 	Refresh(refreshToken string) (*domAuth.Tokens, error)
 	RevokeRefreshToken(refreshToken string) error
 }
+
+type Validator interface {
+	Struct(v any) error
+}

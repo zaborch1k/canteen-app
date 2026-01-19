@@ -2,6 +2,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,10 +18,24 @@ type AuthHandler struct {
 	accessTTL  time.Duration
 	refreshTTL time.Duration
 	tokenSvc   usecase.TokenService
+	validator  common.Validator
 }
 
-func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, accessTTL time.Duration, refreshTTL time.Duration, tokenSvc usecase.TokenService) {
-	handler := &AuthHandler{auth: auth, accessTTL: accessTTL, refreshTTL: refreshTTL, tokenSvc: tokenSvc}
+func NewAuthHandler(
+	router *gin.Engine,
+	auth common.AuthUseCase,
+	accessTTL time.Duration,
+	refreshTTL time.Duration,
+	tokenSvc usecase.TokenService,
+	validator common.Validator,
+) {
+	handler := &AuthHandler{
+		auth:       auth,
+		accessTTL:  accessTTL,
+		refreshTTL: refreshTTL,
+		tokenSvc:   tokenSvc,
+		validator:  validator,
+	}
 
 	router.LoadHTMLGlob("internal/adapter/http/web/templates/*")
 
@@ -44,11 +59,11 @@ func (ah *AuthHandler) RegisterGET(c *gin.Context) {
 }
 
 type RegisterFormData struct {
-	Login    string
-	Password string
-	Name     string
-	Surname  string
-	Role     string
+	Login    string `validate:"required,min=2,max=50"`
+	Password string `validate:"required,min=8,max=100"`
+	Name     string `validate:"required,max=100,alpha"`
+	Surname  string `validate:"required,max=100,alpha"`
+	Role     string `validate:"required"`
 }
 
 func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
@@ -58,6 +73,12 @@ func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
 	formData.Surname = c.PostForm("surname")
 	formData.Password = c.PostForm("password")
 	formData.Role = c.PostForm("role")
+
+	if err := ah.validator.Struct(formData); err != nil {
+		fmt.Println(err.Error())
+		redirectToAuthPage(c, "/register", "validation error")
+		return
+	}
 
 	tokens, err := ah.auth.Register(formData.Login, formData.Password, formData.Name, formData.Surname, formData.Role)
 	if err != nil {
@@ -90,14 +111,19 @@ func (ah *AuthHandler) LoginGET(c *gin.Context) {
 }
 
 type LoginFormData struct {
-	Login    string
-	Password string
+	Login    string `validate:"required,max=50"`
+	Password string `validate:"required,max=100"`
 }
 
 func (ah *AuthHandler) LoginPOST(c *gin.Context) {
 	formData := LoginFormData{}
 	formData.Login = c.PostForm("login")
 	formData.Password = c.PostForm("password")
+
+	if err := ah.validator.Struct(formData); err != nil {
+		redirectToAuthPage(c, "/login", "validation error")
+		return
+	}
 
 	tokens, err := ah.auth.Login(formData.Login, formData.Password)
 	if err != nil {
