@@ -76,7 +76,8 @@ func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
 
 	if err := ah.validator.Struct(formData); err != nil {
 		fmt.Println(err.Error())
-		redirectToAuthPage(c, "/register", "validation error")
+		_, msg := common.ErrorToHTTP(common.ErrValidationError)
+		redirectToAuthPage(c, "/register", msg)
 		return
 	}
 
@@ -121,7 +122,8 @@ func (ah *AuthHandler) LoginPOST(c *gin.Context) {
 	formData.Password = c.PostForm("password")
 
 	if err := ah.validator.Struct(formData); err != nil {
-		redirectToAuthPage(c, "/login", "validation error")
+		_, msg := common.ErrorToHTTP(common.ErrValidationError)
+		redirectToAuthPage(c, "/login", msg)
 		return
 	}
 

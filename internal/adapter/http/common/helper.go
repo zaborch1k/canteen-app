@@ -15,6 +15,9 @@ func ErrorToHTTP(err error) (code int, msg string) {
 	case errors.Is(err, ErrInvalidRequest):
 		return http.StatusBadRequest, "invalid request"
 
+	case errors.Is(err, ErrValidationError):
+		return http.StatusBadRequest, "validation error"
+
 	case errors.Is(err, usecase.ErrInvalidCredentials):
 		return http.StatusUnauthorized, "invalid credentials"
 
