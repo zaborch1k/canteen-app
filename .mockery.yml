@@ -16,5 +16,12 @@ packages:
       all: false
       dir: internal/adapter/http/api/mocks
       pkgname: mocks
-      include-interface-regex: AuthUseCase
-      filename: AuthUseCase.go
+    interfaces: 
+      AuthUseCase:
+        config:
+          structname: AuthUseCase
+          filename: AuthUseCase.go
+      Validator:
+        config: 
+          structname: Validator
+          filename: Validator.go
