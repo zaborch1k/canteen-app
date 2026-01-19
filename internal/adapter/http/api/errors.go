@@ -23,6 +23,6 @@ type RefreshTokenErrorResponse struct {
 	Error string `json:"error" example:"refresh token error"`
 }
 
-type ValidatioErrorResponse struct {
+type ValidationErrorResponse struct {
 	Error string `json:"error" example:"validation error"`
 }

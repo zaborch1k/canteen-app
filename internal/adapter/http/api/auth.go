@@ -56,6 +56,7 @@ type RegisterRequest struct {
 //	@Param			input	body		RegisterRequest				true	"Данные для регистрации"
 //	@Success		201		{object}	AccessTokenResponse			"Пользователь успешно зарегистрирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
+//	@Failure		400		{object}	ValidationErrorResponse		"Данные невалидны"
 //	@Failure		409		{object}	LoginInUseErrorResponse		"Пользователь с таким логином уже существует"
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/api/auth/register [post]
@@ -107,6 +108,7 @@ type LoginRequest struct {
 //	@Param			input	body		LoginRequest					true	"Данные для входа"
 //	@Success		200		{object}	AccessTokenResponse				"Пользователь успешно аутентифицирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
+//	@Failure		400		{object}	ValidationErrorResponse			"Данные невалидны"
 //	@Failure		401		{object}	InvalidCredentialsErrorResponse	"Логин/пароль некорректен"
 //	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
 //	@Router			/api/auth/login [post]

@@ -33,9 +33,11 @@ definitions:
     properties:
       login:
         example: the_real_slim_shady
+        maxLength: 50
         type: string
       password:
         example: password1234
+        maxLength: 100
         type: string
     required:
     - login
@@ -51,18 +53,24 @@ definitions:
     properties:
       login:
         example: the_real_slim_shady
+        maxLength: 50
+        minLength: 2
         type: string
       name:
         example: Slim
+        maxLength: 100
         type: string
       password:
         example: password1234
+        maxLength: 100
+        minLength: 8
         type: string
       role:
         example: admin
         type: string
       surname:
         example: Shady
+        maxLength: 100
         type: string
     required:
     - login
@@ -70,6 +78,12 @@ definitions:
     - password
     - role
     - surname
+    type: object
+  api.ValidationErrorResponse:
+    properties:
+      error:
+        example: validation error
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -101,9 +115,9 @@ paths:
           schema:
             $ref: '#/definitions/api.AccessTokenResponse'
         "400":
-          description: Некорректный запрос
+          description: Данные невалидны
           schema:
-            $ref: '#/definitions/api.InvalidRequestErrorResponse'
+            $ref: '#/definitions/api.ValidationErrorResponse'
         "401":
           description: Логин/пароль некорректен
           schema:
@@ -167,9 +181,9 @@ paths:
           schema:
             $ref: '#/definitions/api.AccessTokenResponse'
         "400":
-          description: Некорректный запрос
+          description: Данные невалидны
           schema:
-            $ref: '#/definitions/api.InvalidRequestErrorResponse'
+            $ref: '#/definitions/api.ValidationErrorResponse'
         "409":
           description: Пользователь с таким логином уже существует
           schema:
