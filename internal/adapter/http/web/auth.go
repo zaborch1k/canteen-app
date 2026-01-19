@@ -45,6 +45,8 @@ func NewAuthHandler(
 	router.GET("/login", handler.LoginGET)
 	router.POST("/login", CSRFMiddleware(), handler.LoginPOST)
 
+	router.POST("/logout", CSRFMiddleware(), handler.Logout)
+
 	router.GET("/home", AuthMiddleware(handler.tokenSvc), handler.HomeGET)
 }
 
@@ -166,4 +168,21 @@ func (ah *AuthHandler) HomeGET(c *gin.Context) {
 		"surname": user.Surname,
 		"role":    user.Role,
 	})
+}
+
+func (ah *AuthHandler) Logout(c *gin.Context) {
+	// [TODO]: add blacklist of access tokens for instant logout???
+
+	c.SetCookieData(&http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	c.Redirect(http.StatusSeeOther, "/login")
 }
