@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"canteen-app/internal/adapter/http/api/mocks"
+	"canteen-app/internal/adapter/http/common"
 	domAuth "canteen-app/internal/domain/auth"
 	"canteen-app/internal/usecase"
 
@@ -131,8 +132,42 @@ func TestAuthHandler_Register(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusInternalServerError,
 			wantErrorText:  "internal server error",
+		},
+
+		{
+			name: "valiadtion error",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				"name":     "Slim",
+				"surname":  "Shady",
+				"role":     "admin",
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(common.ErrValidationError).Once()
+			},
+
+			wantStatusCode: http.StatusBadRequest,
+			wantErrorText:  "validation error",
 		},
 	}
 
@@ -277,8 +312,33 @@ func TestAuthHandler_Login(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusInternalServerError,
 			wantErrorText:  "internal server error",
+		},
+
+		{
+			name: "validation error",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(common.ErrValidationError).Once()
+			},
+
+			wantStatusCode: http.StatusBadRequest,
+			wantErrorText:  "validation error",
 		},
 	}
 
