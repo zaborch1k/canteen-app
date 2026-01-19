@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -14,10 +15,15 @@ import (
 type AuthHandler struct {
 	auth       common.AuthUseCase
 	refreshTTL time.Duration
+	validator  common.Validator
 }
 
-func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, refreshTTL time.Duration) {
-	handler := &AuthHandler{auth: auth, refreshTTL: refreshTTL}
+func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, refreshTTL time.Duration, validator common.Validator) {
+	handler := &AuthHandler{
+		auth:       auth,
+		refreshTTL: refreshTTL,
+		validator:  validator,
+	}
 
 	{
 		auth := router.Group("/api/auth")
@@ -33,11 +39,11 @@ type AccessTokenResponse struct {
 }
 
 type RegisterRequest struct {
-	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" example:"password1234"`
-	Name     string `json:"name" binding:"required" example:"Slim"`
-	Surname  string `json:"surname" binding:"required" example:"Shady"`
-	Role     string `json:"role" binding:"required" example:"admin"`
+	Login    string `json:"login" binding:"required" validate:"required,min=2,max=50" example:"the_real_slim_shady"`
+	Password string `json:"password" binding:"required" validate:"required,min=8,max=100" example:"password1234"`
+	Name     string `json:"name" binding:"required" validate:"required,max=100,alpha" example:"Slim"`
+	Surname  string `json:"surname" binding:"required" validate:"required,max=100,alpha" example:"Shady"`
+	Role     string `json:"role" binding:"required" validate:"required" example:"admin"`
 }
 
 // Register godoc
@@ -57,6 +63,12 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, common.ErrInvalidRequest)
+		return
+	}
+
+	if err := ah.validator.Struct(req); err != nil {
+		fmt.Println(err.Error())
+		writeError(c, common.ErrValidationError)
 		return
 	}
 
@@ -81,8 +93,8 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 }
 
 type LoginRequest struct {
-	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" example:"password1234"`
+	Login    string `json:"login" binding:"required" validate:"required,max=50" example:"the_real_slim_shady"`
+	Password string `json:"password" binding:"required" validate:"required,max=100" example:"password1234"`
 }
 
 // Login godoc
@@ -102,6 +114,11 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, common.ErrInvalidRequest)
+		return
+	}
+
+	if err := ah.validator.Struct(req); err != nil {
+		writeError(c, common.ErrValidationError)
 		return
 	}
 

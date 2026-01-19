@@ -18,11 +18,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func setupRouterWithAuthUseCase(authUC *mocks.AuthUseCase, refreshTTL time.Duration) *gin.Engine {
+func setupRouterWithAuthUseCase(authUC *mocks.AuthUseCase, refreshTTL time.Duration, validator *mocks.Validator) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	NewAuthHandler(r, authUC, refreshTTL)
+	NewAuthHandler(r, authUC, refreshTTL, validator)
 
 	return r
 }
@@ -32,6 +32,7 @@ func TestAuthHandler_Register(t *testing.T) {
 		name           string
 		requestBody    map[string]string
 		setupAuthUC    func(m *mocks.AuthUseCase)
+		setupValidator func(m *mocks.Validator)
 		wantStatusCode int
 		wantErrorText  string
 	}{
@@ -51,6 +52,16 @@ func TestAuthHandler_Register(t *testing.T) {
 						AccessToken:  "access_token",
 						RefreshToken: "refresh_token",
 					}, nil).Once()
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
 			},
 
 			wantStatusCode: http.StatusCreated,
@@ -88,6 +99,16 @@ func TestAuthHandler_Register(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusConflict,
 			wantErrorText:  "login already in use",
 		},
@@ -123,7 +144,13 @@ func TestAuthHandler_Register(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			if tc.setupValidator != nil {
+				tc.setupValidator(validator)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/register", bytes.NewReader(bodyBytes))
@@ -169,6 +196,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		name           string
 		requestBody    map[string]string
 		setupAuthUC    func(m *mocks.AuthUseCase)
+		setupValidator func(m *mocks.Validator)
 		wantStatusCode int
 		wantErrorText  string
 	}{
@@ -185,6 +213,13 @@ func TestAuthHandler_Login(t *testing.T) {
 						AccessToken:  "access_token",
 						RefreshToken: "refresh_token",
 					}, nil).Once()
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
 			},
 
 			wantStatusCode: http.StatusOK,
@@ -214,6 +249,13 @@ func TestAuthHandler_Login(t *testing.T) {
 						return &domAuth.Tokens{}, usecase.ErrInvalidCredentials
 					},
 				).Once()
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
 			},
 
 			wantStatusCode: http.StatusUnauthorized,
@@ -248,7 +290,13 @@ func TestAuthHandler_Login(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			if tc.setupValidator != nil {
+				tc.setupValidator(validator)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewReader(bodyBytes))
@@ -390,7 +438,9 @@ func TestAuthHandler_Refresh(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodGet, "/api/auth/refresh", bytes.NewReader(bodyBytes))
@@ -503,7 +553,9 @@ func TestAuthHandler_Logout(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/logout", bytes.NewReader(bodyBytes))

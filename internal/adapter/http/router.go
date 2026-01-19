@@ -23,7 +23,7 @@ func NewRouter(
 ) *gin.Engine {
 	r := gin.Default()
 
-	api.NewAuthHandler(r, authUC, refreshTTL)
+	api.NewAuthHandler(r, authUC, refreshTTL, validator)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	web.NewAuthHandler(r, authUC, accessTTL, refreshTTL, tokenSvc, validator)
