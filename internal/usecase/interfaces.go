@@ -4,6 +4,7 @@ import (
 	"time"
 
 	domAuth "canteen-app/internal/domain/auth"
+	domMenu "canteen-app/internal/domain/menu"
 	domUser "canteen-app/internal/domain/user"
 )
 
@@ -11,6 +12,10 @@ type UserRepository interface {
 	CreateUser(user domUser.User) domUser.UserID
 	GetUserByID(id domUser.UserID) (*domUser.User, error)
 	GetUserByLogin(login string) (*domUser.User, error)
+}
+
+type MenuRepository interface {
+	GetMenuByDate(date time.Time) (*domMenu.DayMenu, error)
 }
 
 type RefreshTokenRepository interface {
