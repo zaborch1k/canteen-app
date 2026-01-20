@@ -281,6 +281,11 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "string",
+                    "enum": [
+                        "admin",
+                        "employee",
+                        "user"
+                    ],
                     "example": "admin"
                 },
                 "surname": {

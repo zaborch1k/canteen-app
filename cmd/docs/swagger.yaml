@@ -72,6 +72,10 @@ definitions:
         minLength: 8
         type: string
       role:
+        enum:
+        - admin
+        - employee
+        - user
         example: admin
         type: string
       surname:
