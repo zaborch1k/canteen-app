@@ -6,7 +6,7 @@ build:
 
 .PHONY: gen-swag-docs
 gen-swag-docs:
-	swag init --dir ./cmd/http-server,./internal/adapter/http/api -o cmd/docs
+	swag init --dir ./cmd/http-server,./internal/adapter/http/api,./internal/adapter/http/common -o cmd/docs
 
 .PHONY: gen-mocks
 gen-mocks:
@@ -19,3 +19,7 @@ run:
 .PHONY: test-auth-api
 test-auth-api: 
 	go test -v canteen-app/internal/adapter/http/api/
+
+.PHONY: test-validation
+test-validation: 
+	go test -v canteen-app/internal/adapter/http/

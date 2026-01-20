@@ -38,7 +38,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.LoginRequest"
+                            "$ref": "#/definitions/common.LoginRequest"
                         }
                     }
                 ],
@@ -50,9 +50,9 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный запрос",
+                        "description": "Данные невалидны",
                         "schema": {
-                            "$ref": "#/definitions/api.InvalidRequestErrorResponse"
+                            "$ref": "#/definitions/api.ValidationErrorResponse"
                         }
                     },
                     "401": {
@@ -136,7 +136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.RegisterRequest"
+                            "$ref": "#/definitions/common.RegisterRequest"
                         }
                     }
                 ],
@@ -148,15 +148,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный запрос",
+                        "description": "Данные невалидны",
                         "schema": {
-                            "$ref": "#/definitions/api.InvalidRequestErrorResponse"
+                            "$ref": "#/definitions/api.ValidationErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Пользователь с таким логином уже существует",
                         "schema": {
-                            "$ref": "#/definitions/api.UserExistsErrorResponse"
+                            "$ref": "#/definitions/api.LoginInUseErrorResponse"
                         }
                     },
                     "500": {
@@ -206,20 +206,12 @@ const docTemplate = `{
                 }
             }
         },
-        "api.LoginRequest": {
+        "api.LoginInUseErrorResponse": {
             "type": "object",
-            "required": [
-                "login",
-                "password"
-            ],
             "properties": {
-                "login": {
+                "error": {
                     "type": "string",
-                    "example": "the_real_slim_shady"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "password1234"
+                    "example": "login already in use"
                 }
             }
         },
@@ -232,7 +224,35 @@ const docTemplate = `{
                 }
             }
         },
-        "api.RegisterRequest": {
+        "api.ValidationErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "validation error"
+                }
+            }
+        },
+        "common.LoginRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "the_real_slim_shady"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "password1234"
+                }
+            }
+        },
+        "common.RegisterRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -244,32 +264,34 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2,
                     "example": "the_real_slim_shady"
                 },
                 "name": {
                     "type": "string",
+                    "maxLength": 100,
                     "example": "Slim"
                 },
                 "password": {
                     "type": "string",
+                    "maxLength": 100,
+                    "minLength": 8,
                     "example": "password1234"
                 },
                 "role": {
                     "type": "string",
+                    "enum": [
+                        "admin",
+                        "employee",
+                        "user"
+                    ],
                     "example": "admin"
                 },
                 "surname": {
                     "type": "string",
+                    "maxLength": 100,
                     "example": "Shady"
-                }
-            }
-        },
-        "api.UserExistsErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "user already exists"
                 }
             }
         }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -14,10 +15,15 @@ import (
 type AuthHandler struct {
 	auth       common.AuthUseCase
 	refreshTTL time.Duration
+	validator  common.Validator
 }
 
-func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, refreshTTL time.Duration) {
-	handler := &AuthHandler{auth: auth, refreshTTL: refreshTTL}
+func NewAuthHandler(router *gin.Engine, auth common.AuthUseCase, refreshTTL time.Duration, validator common.Validator) {
+	handler := &AuthHandler{
+		auth:       auth,
+		refreshTTL: refreshTTL,
+		validator:  validator,
+	}
 
 	{
 		auth := router.Group("/api/auth")
@@ -32,14 +38,6 @@ type AccessTokenResponse struct {
 	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
-type RegisterRequest struct {
-	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" example:"password1234"`
-	Name     string `json:"name" binding:"required" example:"Slim"`
-	Surname  string `json:"surname" binding:"required" example:"Shady"`
-	Role     string `json:"role" binding:"required" example:"admin"`
-}
-
 // Register godoc
 //
 //	@Summary		Регистрация пользователя
@@ -47,16 +45,23 @@ type RegisterRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		RegisterRequest				true	"Данные для регистрации"
+//	@Param			input	body		common.RegisterRequest		true	"Данные для регистрации"
 //	@Success		201		{object}	AccessTokenResponse			"Пользователь успешно зарегистрирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
-//	@Failure		409		{object}	UserExistsErrorResponse		"Пользователь с таким логином уже существует"
+//	@Failure		400		{object}	ValidationErrorResponse		"Данные невалидны"
+//	@Failure		409		{object}	LoginInUseErrorResponse		"Пользователь с таким логином уже существует"
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/api/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req common.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		writeError(c, ErrInvalidRequest)
+		writeError(c, common.ErrInvalidRequest)
+		return
+	}
+
+	if err := ah.validator.Struct(req); err != nil {
+		fmt.Println(err.Error())
+		writeError(c, common.ErrValidationError)
 		return
 	}
 
@@ -80,11 +85,6 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, AccessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
-type LoginRequest struct {
-	Login    string `json:"login" binding:"required" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" example:"password1234"`
-}
-
 // Login godoc
 //
 //	@Summary		Аутентификация пользователя
@@ -92,16 +92,22 @@ type LoginRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		LoginRequest					true	"Данные для входа"
+//	@Param			input	body		common.LoginRequest				true	"Данные для входа"
 //	@Success		200		{object}	AccessTokenResponse				"Пользователь успешно аутентифицирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
+//	@Failure		400		{object}	ValidationErrorResponse			"Данные невалидны"
 //	@Failure		401		{object}	InvalidCredentialsErrorResponse	"Логин/пароль некорректен"
 //	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
 //	@Router			/api/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
-	var req LoginRequest
+	var req common.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		writeError(c, ErrInvalidRequest)
+		writeError(c, common.ErrInvalidRequest)
+		return
+	}
+
+	if err := ah.validator.Struct(req); err != nil {
+		writeError(c, common.ErrValidationError)
 		return
 	}
 
@@ -138,7 +144,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 func (ah *AuthHandler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		writeError(c, ErrRefreshTokenError)
+		writeError(c, common.ErrRefreshTokenError)
 		return
 	}
 

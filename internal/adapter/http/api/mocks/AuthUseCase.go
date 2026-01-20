@@ -38,6 +38,68 @@ func (_m *AuthUseCase) EXPECT() *AuthUseCase_Expecter {
 	return &AuthUseCase_Expecter{mock: &_m.Mock}
 }
 
+// GetUserByID provides a mock function for the type AuthUseCase
+func (_mock *AuthUseCase) GetUserByID(userID user.UserID) (*user.User, error) {
+	ret := _mock.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByID")
+	}
+
+	var r0 *user.User
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(user.UserID) (*user.User, error)); ok {
+		return returnFunc(userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(user.UserID) *user.User); ok {
+		r0 = returnFunc(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*user.User)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(user.UserID) error); ok {
+		r1 = returnFunc(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// AuthUseCase_GetUserByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByID'
+type AuthUseCase_GetUserByID_Call struct {
+	*mock.Call
+}
+
+// GetUserByID is a helper method to define mock.On call
+//   - userID user.UserID
+func (_e *AuthUseCase_Expecter) GetUserByID(userID interface{}) *AuthUseCase_GetUserByID_Call {
+	return &AuthUseCase_GetUserByID_Call{Call: _e.mock.On("GetUserByID", userID)}
+}
+
+func (_c *AuthUseCase_GetUserByID_Call) Run(run func(userID user.UserID)) *AuthUseCase_GetUserByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 user.UserID
+		if args[0] != nil {
+			arg0 = args[0].(user.UserID)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *AuthUseCase_GetUserByID_Call) Return(user1 *user.User, err error) *AuthUseCase_GetUserByID_Call {
+	_c.Call.Return(user1, err)
+	return _c
+}
+
+func (_c *AuthUseCase_GetUserByID_Call) RunAndReturn(run func(userID user.UserID) (*user.User, error)) *AuthUseCase_GetUserByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetUserByLogin provides a mock function for the type AuthUseCase
 func (_mock *AuthUseCase) GetUserByLogin(login string) (*user.User, error) {
 	ret := _mock.Called(login)

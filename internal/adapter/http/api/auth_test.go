@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"canteen-app/internal/adapter/http/api/mocks"
+	"canteen-app/internal/adapter/http/common"
 	domAuth "canteen-app/internal/domain/auth"
 	"canteen-app/internal/usecase"
 
@@ -18,11 +19,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func setupRouterWithAuthUseCase(authUC *mocks.AuthUseCase, refreshTTL time.Duration) *gin.Engine {
+func setupRouterWithAuthUseCase(authUC *mocks.AuthUseCase, refreshTTL time.Duration, validator *mocks.Validator) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	NewAuthHandler(r, authUC, refreshTTL)
+	NewAuthHandler(r, authUC, refreshTTL, validator)
 
 	return r
 }
@@ -32,6 +33,7 @@ func TestAuthHandler_Register(t *testing.T) {
 		name           string
 		requestBody    map[string]string
 		setupAuthUC    func(m *mocks.AuthUseCase)
+		setupValidator func(m *mocks.Validator)
 		wantStatusCode int
 		wantErrorText  string
 	}{
@@ -51,6 +53,16 @@ func TestAuthHandler_Register(t *testing.T) {
 						AccessToken:  "access_token",
 						RefreshToken: "refresh_token",
 					}, nil).Once()
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
 			},
 
 			wantStatusCode: http.StatusCreated,
@@ -83,13 +95,23 @@ func TestAuthHandler_Register(t *testing.T) {
 			setupAuthUC: func(m *mocks.AuthUseCase) {
 				m.On("Register", "the_real_slim_shady", "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj", "Slim", "Shady", "admin").Return(
 					func(login, password, name, surname, role string) (*domAuth.Tokens, error) {
-						return &domAuth.Tokens{}, usecase.ErrUserExists
+						return &domAuth.Tokens{}, usecase.ErrLoginInUse
 					},
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusConflict,
-			wantErrorText:  "user already exists",
+			wantErrorText:  "login already in use",
 		},
 
 		{
@@ -110,8 +132,42 @@ func TestAuthHandler_Register(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusInternalServerError,
 			wantErrorText:  "internal server error",
+		},
+
+		{
+			name: "valiadtion error",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				"name":     "Slim",
+				"surname":  "Shady",
+				"role":     "admin",
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.RegisterRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+					Name:     "Slim",
+					Surname:  "Shady",
+					Role:     "admin",
+				}).Return(common.ErrValidationError).Once()
+			},
+
+			wantStatusCode: http.StatusBadRequest,
+			wantErrorText:  "validation error",
 		},
 	}
 
@@ -123,7 +179,13 @@ func TestAuthHandler_Register(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			if tc.setupValidator != nil {
+				tc.setupValidator(validator)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/register", bytes.NewReader(bodyBytes))
@@ -169,6 +231,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		name           string
 		requestBody    map[string]string
 		setupAuthUC    func(m *mocks.AuthUseCase)
+		setupValidator func(m *mocks.Validator)
 		wantStatusCode int
 		wantErrorText  string
 	}{
@@ -185,6 +248,13 @@ func TestAuthHandler_Login(t *testing.T) {
 						AccessToken:  "access_token",
 						RefreshToken: "refresh_token",
 					}, nil).Once()
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
 			},
 
 			wantStatusCode: http.StatusOK,
@@ -216,6 +286,13 @@ func TestAuthHandler_Login(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusUnauthorized,
 			wantErrorText:  "invalid credentials",
 		},
@@ -235,8 +312,33 @@ func TestAuthHandler_Login(t *testing.T) {
 				).Once()
 			},
 
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(nil).Once()
+			},
+
 			wantStatusCode: http.StatusInternalServerError,
 			wantErrorText:  "internal server error",
+		},
+
+		{
+			name: "validation error",
+			requestBody: map[string]string{
+				"login":    "the_real_slim_shady",
+				"password": "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+			},
+
+			setupValidator: func(m *mocks.Validator) {
+				m.On("Struct", common.LoginRequest{
+					Login:    "the_real_slim_shady",
+					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
+				}).Return(common.ErrValidationError).Once()
+			},
+
+			wantStatusCode: http.StatusBadRequest,
+			wantErrorText:  "validation error",
 		},
 	}
 
@@ -248,7 +350,13 @@ func TestAuthHandler_Login(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			if tc.setupValidator != nil {
+				tc.setupValidator(validator)
+			}
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewReader(bodyBytes))
@@ -390,7 +498,9 @@ func TestAuthHandler_Refresh(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodGet, "/api/auth/refresh", bytes.NewReader(bodyBytes))
@@ -503,7 +613,9 @@ func TestAuthHandler_Logout(t *testing.T) {
 				tc.setupAuthUC(authUC)
 			}
 
-			router := setupRouterWithAuthUseCase(authUC, time.Duration(30))
+			validator := mocks.NewValidator(t)
+
+			router := setupRouterWithAuthUseCase(authUC, time.Duration(30), validator)
 
 			bodyBytes, err := json.Marshal(tc.requestBody)
 			req, err := http.NewRequest(http.MethodPost, "/api/auth/logout", bytes.NewReader(bodyBytes))

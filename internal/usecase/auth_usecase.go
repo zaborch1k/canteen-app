@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"canteen-app/internal/adapter/http/common"
 	domAuth "canteen-app/internal/domain/auth"
 	domUser "canteen-app/internal/domain/user"
 )
@@ -13,15 +12,13 @@ type authUseCase struct {
 	hasher      PasswordHasher
 }
 
-var _ common.AuthUseCase = (*authUseCase)(nil)
-
 func NewAuthUseCase(users UserRepository, tokens TokenService, refreshRepo RefreshTokenRepository, hasher PasswordHasher) *authUseCase {
 	return &authUseCase{users: users, tokens: tokens, refreshRepo: refreshRepo, hasher: hasher}
 }
 
 func (uc *authUseCase) Register(login, password, name, surname, role string) (*domAuth.Tokens, error) {
 	if _, err := uc.users.GetUserByLogin(login); err == nil {
-		return nil, ErrUserExists
+		return nil, ErrLoginInUse
 	}
 
 	hash, err := uc.hasher.Hash(password)
@@ -81,6 +78,14 @@ func (uc *authUseCase) Login(login, password string) (*domAuth.Tokens, error) {
 
 func (uc *authUseCase) GetUserByLogin(login string) (*domUser.User, error) {
 	user, err := uc.users.GetUserByLogin(login)
+	if err != nil {
+		return &domUser.User{}, err
+	}
+	return user, nil
+}
+
+func (uc *authUseCase) GetUserByID(userID domUser.UserID) (*domUser.User, error) {
+	user, err := uc.users.GetUserByID(userID)
 	if err != nil {
 		return &domUser.User{}, err
 	}
