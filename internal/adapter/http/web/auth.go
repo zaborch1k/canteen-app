@@ -37,7 +37,7 @@ func NewAuthHandler(
 		validator:  validator,
 	}
 
-	router.LoadHTMLGlob("internal/adapter/http/web/templates/*")
+	router.LoadHTMLGlob("internal/adapter/http/web/templates/*.html")
 
 	router.GET("/register", handler.RegisterGET)
 	router.POST("/register", CSRFMiddleware(), handler.RegisterPOST)
@@ -150,10 +150,26 @@ func (ah *AuthHandler) HomeGET(c *gin.Context) {
 		redirectToAuthPage(c, "/login", msg)
 		return
 	}
-	c.HTML(http.StatusOK, "index.html", gin.H{
+
+	var template string
+
+	switch user.Role {
+	case "admin":
+		template = "home_admin.html"
+
+	case "employee":
+		template = "home_employee.html"
+
+	case "user":
+		template = "home_user.html"
+
+	default:
+		redirectToAuthPage(c, "/login", "")
+	}
+
+	c.HTML(http.StatusOK, template, gin.H{
 		"name":    user.Name,
 		"surname": user.Surname,
-		"role":    user.Role,
 	})
 }
 
