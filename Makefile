@@ -19,3 +19,7 @@ run:
 .PHONY: test-auth-api
 test-auth-api: 
 	go test -v canteen-app/internal/adapter/http/api/
+
+.PHONY: test-validation
+test-validation: 
+	go test -v canteen-app/internal/adapter/http/
