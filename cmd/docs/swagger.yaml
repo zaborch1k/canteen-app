@@ -29,7 +29,19 @@ definitions:
         example: login already in use
         type: string
     type: object
-  api.LoginRequest:
+  api.RefreshTokenErrorResponse:
+    properties:
+      error:
+        example: refresh token error
+        type: string
+    type: object
+  api.ValidationErrorResponse:
+    properties:
+      error:
+        example: validation error
+        type: string
+    type: object
+  common.LoginRequest:
     properties:
       login:
         example: the_real_slim_shady
@@ -43,13 +55,7 @@ definitions:
     - login
     - password
     type: object
-  api.RefreshTokenErrorResponse:
-    properties:
-      error:
-        example: refresh token error
-        type: string
-    type: object
-  api.RegisterRequest:
+  common.RegisterRequest:
     properties:
       login:
         example: the_real_slim_shady
@@ -79,12 +85,6 @@ definitions:
     - role
     - surname
     type: object
-  api.ValidationErrorResponse:
-    properties:
-      error:
-        example: validation error
-        type: string
-    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -106,7 +106,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.LoginRequest'
+          $ref: '#/definitions/common.LoginRequest'
       produces:
       - application/json
       responses:
@@ -172,7 +172,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.RegisterRequest'
+          $ref: '#/definitions/common.RegisterRequest'
       produces:
       - application/json
       responses:

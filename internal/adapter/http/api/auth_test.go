@@ -56,7 +56,7 @@ func TestAuthHandler_Register(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", RegisterRequest{
+				m.On("Struct", common.RegisterRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 					Name:     "Slim",
@@ -101,7 +101,7 @@ func TestAuthHandler_Register(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", RegisterRequest{
+				m.On("Struct", common.RegisterRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 					Name:     "Slim",
@@ -133,7 +133,7 @@ func TestAuthHandler_Register(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", RegisterRequest{
+				m.On("Struct", common.RegisterRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 					Name:     "Slim",
@@ -157,7 +157,7 @@ func TestAuthHandler_Register(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", RegisterRequest{
+				m.On("Struct", common.RegisterRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 					Name:     "Slim",
@@ -251,7 +251,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", LoginRequest{
+				m.On("Struct", common.LoginRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 				}).Return(nil).Once()
@@ -287,7 +287,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", LoginRequest{
+				m.On("Struct", common.LoginRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 				}).Return(nil).Once()
@@ -313,7 +313,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", LoginRequest{
+				m.On("Struct", common.LoginRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 				}).Return(nil).Once()
@@ -331,7 +331,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 
 			setupValidator: func(m *mocks.Validator) {
-				m.On("Struct", LoginRequest{
+				m.On("Struct", common.LoginRequest{
 					Login:    "the_real_slim_shady",
 					Password: "sdf3kJIS2FgiwefiJCiSJ5#@KJFKj",
 				}).Return(common.ErrValidationError).Once()

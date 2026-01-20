@@ -38,7 +38,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.LoginRequest"
+                            "$ref": "#/definitions/common.LoginRequest"
                         }
                     }
                 ],
@@ -136,7 +136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.RegisterRequest"
+                            "$ref": "#/definitions/common.RegisterRequest"
                         }
                     }
                 ],
@@ -215,7 +215,25 @@ const docTemplate = `{
                 }
             }
         },
-        "api.LoginRequest": {
+        "api.RefreshTokenErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "refresh token error"
+                }
+            }
+        },
+        "api.ValidationErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "validation error"
+                }
+            }
+        },
+        "common.LoginRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -234,16 +252,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.RefreshTokenErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "refresh token error"
-                }
-            }
-        },
-        "api.RegisterRequest": {
+        "common.RegisterRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -278,15 +287,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "example": "Shady"
-                }
-            }
-        },
-        "api.ValidationErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "validation error"
                 }
             }
         }

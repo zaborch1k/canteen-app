@@ -60,16 +60,8 @@ func (ah *AuthHandler) RegisterGET(c *gin.Context) {
 	})
 }
 
-type RegisterFormData struct {
-	Login    string `validate:"required,min=2,max=50"`
-	Password string `validate:"required,min=8,max=100"`
-	Name     string `validate:"required,max=100,alpha"`
-	Surname  string `validate:"required,max=100,alpha"`
-	Role     string `validate:"required"`
-}
-
 func (ah *AuthHandler) RegisterPOST(c *gin.Context) {
-	formData := RegisterFormData{}
+	formData := common.RegisterRequest{}
 	formData.Login = c.PostForm("login")
 	formData.Name = c.PostForm("name")
 	formData.Surname = c.PostForm("surname")
@@ -113,13 +105,8 @@ func (ah *AuthHandler) LoginGET(c *gin.Context) {
 	})
 }
 
-type LoginFormData struct {
-	Login    string `validate:"required,max=50"`
-	Password string `validate:"required,max=100"`
-}
-
 func (ah *AuthHandler) LoginPOST(c *gin.Context) {
-	formData := LoginFormData{}
+	formData := common.LoginRequest{}
 	formData.Login = c.PostForm("login")
 	formData.Password = c.PostForm("password")
 

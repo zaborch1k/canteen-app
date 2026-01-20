@@ -6,7 +6,7 @@ build:
 
 .PHONY: gen-swag-docs
 gen-swag-docs:
-	swag init --dir ./cmd/http-server,./internal/adapter/http/api -o cmd/docs
+	swag init --dir ./cmd/http-server,./internal/adapter/http/api,./internal/adapter/http/common -o cmd/docs
 
 .PHONY: gen-mocks
 gen-mocks:

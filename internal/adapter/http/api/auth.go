@@ -38,14 +38,6 @@ type AccessTokenResponse struct {
 	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
-type RegisterRequest struct {
-	Login    string `json:"login" binding:"required" validate:"required,min=2,max=50" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" validate:"required,min=8,max=100" example:"password1234"`
-	Name     string `json:"name" binding:"required" validate:"required,max=100,alpha" example:"Slim"`
-	Surname  string `json:"surname" binding:"required" validate:"required,max=100,alpha" example:"Shady"`
-	Role     string `json:"role" binding:"required" validate:"required" example:"admin"`
-}
-
 // Register godoc
 //
 //	@Summary		Регистрация пользователя
@@ -53,7 +45,7 @@ type RegisterRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		RegisterRequest				true	"Данные для регистрации"
+//	@Param			input	body		common.RegisterRequest		true	"Данные для регистрации"
 //	@Success		201		{object}	AccessTokenResponse			"Пользователь успешно зарегистрирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse	"Некорректный запрос"
 //	@Failure		400		{object}	ValidationErrorResponse		"Данные невалидны"
@@ -61,7 +53,7 @@ type RegisterRequest struct {
 //	@Failure		500		{object}	InternalServerErrorResponse	"Внутренняя ошибка сервера"
 //	@Router			/api/auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req common.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, common.ErrInvalidRequest)
 		return
@@ -93,11 +85,6 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, AccessTokenResponse{AccessToken: tokens.AccessToken})
 }
 
-type LoginRequest struct {
-	Login    string `json:"login" binding:"required" validate:"required,max=50" example:"the_real_slim_shady"`
-	Password string `json:"password" binding:"required" validate:"required,max=100" example:"password1234"`
-}
-
 // Login godoc
 //
 //	@Summary		Аутентификация пользователя
@@ -105,7 +92,7 @@ type LoginRequest struct {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			input	body		LoginRequest					true	"Данные для входа"
+//	@Param			input	body		common.LoginRequest				true	"Данные для входа"
 //	@Success		200		{object}	AccessTokenResponse				"Пользователь успешно аутентифицирован"
 //	@Failure		400		{object}	InvalidRequestErrorResponse		"Некорректный запрос"
 //	@Failure		400		{object}	ValidationErrorResponse			"Данные невалидны"
@@ -113,7 +100,7 @@ type LoginRequest struct {
 //	@Failure		500		{object}	InternalServerErrorResponse		"Внутренняя ошибка сервера"
 //	@Router			/api/auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
-	var req LoginRequest
+	var req common.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, common.ErrInvalidRequest)
 		return
