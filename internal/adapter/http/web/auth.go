@@ -160,11 +160,12 @@ func (ah *AuthHandler) HomeGET(c *gin.Context) {
 	case "employee":
 		template = "home_employee.html"
 
-	case "user":
-		template = "home_user.html"
+	case "student":
+		template = "home_student.html"
 
 	default:
 		redirectToAuthPage(c, "/login", "")
+		return
 	}
 
 	c.HTML(http.StatusOK, template, gin.H{

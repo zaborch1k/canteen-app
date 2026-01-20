@@ -284,7 +284,7 @@ const docTemplate = `{
                     "enum": [
                         "admin",
                         "employee",
-                        "user"
+                        "student"
                     ],
                     "example": "admin"
                 },

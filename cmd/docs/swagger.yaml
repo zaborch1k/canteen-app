@@ -75,7 +75,7 @@ definitions:
         enum:
         - admin
         - employee
-        - user
+        - student
         example: admin
         type: string
       surname:
